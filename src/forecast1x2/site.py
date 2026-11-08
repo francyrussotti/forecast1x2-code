@@ -104,6 +104,43 @@ def _slip(m) -> dict:
             "value": _f(m["value"])}
 
 
+BANDS = [(0.0, 0.6, "sotto il 60%"), (0.6, 0.7, "60-70%"), (0.7, 0.8, "70-80%"), (0.8, 1.01, "oltre l'80%")]
+
+
+def reliability(picks: pd.DataFrame, slips: pd.DataFrame = None) -> dict:
+    """«When we say X%, it happens Y%»: predicted vs actual win rate of the settled advice, in plain words.
+
+    gap = average distance (points) between predicted and actual, weighted by bets; the verdict gets stronger
+    as more matches are settled, because the sample size is part of it."""
+    done = picks[picks.status.isin(["vinta", "persa"])] if len(picks) else picks
+    if len(done) == 0:
+        return {"n": 0}
+    y = (done.status == "vinta").to_numpy(float)
+    p = done.prob.to_numpy(float)
+    bands = []
+    for lo, hi, label in BANDS:
+        m = (p >= lo) & (p < hi)
+        if m.sum():
+            n, k = int(m.sum()), y[m].mean()
+            half = 1.96 * np.sqrt(max(k * (1 - k), 0.01) / n)   # 95% interval of the actual rate
+            bands.append({"label": label, "n": n, "pred": _f(p[m].mean()), "actual": _f(k), "lo": _f(max(0, k - half)),
+                          "hi": _f(min(1, k + half))})
+    gap = sum(abs(b["pred"] - b["actual"]) * b["n"] for b in bands) / len(done)
+    verdict = "ottima" if gap < 0.03 else "buona" if gap < 0.06 else "da verificare"
+    n = len(done)
+    strength = ("ancora poche partite" if n < 100 else "indicativa" if n < 500 else "solida" if n < 2000
+                else "molto solida")
+    clv = done.clv.dropna().to_numpy(float) if "clv" in done else np.array([])
+    out = {"n": n, "pred": _f(p.mean()), "actual": _f(y.mean()), "gap": _f(gap), "verdict": verdict,
+           "strength": strength, "bands": bands, "clv": _f(clv.mean()) if len(clv) else None, "clv_n": int(len(clv)),
+           "since": str(done.kickoff_utc.min())[:10]}
+    if slips is not None and len(slips):
+        s = slips[slips.status.isin(["vinta", "persa"])]
+        if len(s):
+            out["slips"] = {"n": int(len(s)), "pred": _f(s.prob.mean()), "actual": _f((s.status == "vinta").mean())}
+    return out
+
+
 def _summary(df: pd.DataFrame, by: str = None) -> list:
     from .tracking import summary
     if df.empty:
@@ -183,6 +220,7 @@ def site_data(now: pd.Timestamp = None) -> dict:
     done = picks[picks.status.isin(["vinta", "persa", "rimborsata"])] if len(picks) else picks
     recent = done.sort_values("kickoff_utc", ascending=False).head(40) if len(done) else done
     tracking = {
+        "reliability": reliability(picks, slips),
         "logged": int(len(picks)), "settled": int(len(done)), "open": int((picks.status == "aperta").sum()) if len(picks) else 0,
         "by_kind": _summary(picks, "kind"), "by_group": _summary(picks, "group")[1:],
         "by_book": _summary(picks.assign(book=picks.bookmaker.map(lambda x: BOOKMAKERS.get(x, x))), "book")[1:]
@@ -208,10 +246,11 @@ def build_site(out: Path = SITE, password: str = None, now: pd.Timestamp = None)
         raise DataError(f"manca la password del sito ({PASSWORD_ENV} o {PASSWORD_FILE}): senza non si pubblica nulla")
     data = site_data(now)
     plain = json.dumps(data, ensure_ascii=False, separators=(",", ":"), default=str).encode()
-    digest = hashlib.sha256(plain).hexdigest()[:16]
+    template = (Path(__file__).parent / "site_template.html").read_text()
+    digest = hashlib.sha256(plain + template.encode()).hexdigest()[:16]   # new data or new page: republish
     out.mkdir(parents=True, exist_ok=True)
     write_atomic(out / "data.json", json.dumps(encrypt(plain, password)))
-    write_atomic(out / "index.html", (Path(__file__).parent / "site_template.html").read_text())
+    write_atomic(out / "index.html", template)
     write_atomic(out / "manifest.webmanifest", json.dumps({
         "name": "Forecast 1X2", "short_name": "Forecast 1X2", "start_url": ".", "display": "standalone",
         "background_color": "#0f1712", "theme_color": "#16804c",

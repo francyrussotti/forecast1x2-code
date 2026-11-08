@@ -40,6 +40,19 @@ def test_built_site_has_no_plain_data(tmp_path, monkeypatch):
     assert site.build_site(tmp_path, password="altra") == digest   # same content, same version: nothing to publish
 
 
+def test_reliability_in_plain_numbers():
+    import pandas as pd
+    picks = pd.DataFrame({"status": ["vinta"] * 7 + ["persa"] * 3 + ["aperta"],
+                          "prob": [0.65] * 4 + [0.85] * 6 + [0.7],
+                          "clv": [-0.02] * 10 + [None], "kickoff_utc": ["2026-10-24T14:00:00Z"] * 11})
+    r = site.reliability(picks)
+    assert r["n"] == 10 and r["actual"] == pytest.approx(0.7) and r["pred"] == pytest.approx(0.77)
+    assert [b["label"] for b in r["bands"]] == ["60-70%", "oltre l'80%"]
+    assert r["strength"] == "ancora poche partite" and r["clv"] == pytest.approx(-0.02)
+    assert r["verdict"] in ("ottima", "buona", "da verificare") and r["since"] == "2026-10-24"
+    assert site.reliability(picks.iloc[[10]]) == {"n": 0}
+
+
 def test_icons_are_png():
     data = site.png(32)
     assert data[:8] == b"\x89PNG\r\n\x1a\n" and b"IHDR" in data and data.endswith(b"IEND\xaeB`\x82")
