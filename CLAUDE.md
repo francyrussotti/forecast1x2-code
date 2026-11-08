@@ -29,6 +29,10 @@ Per l'anteprima nel browser integrato c'è la configurazione `dashboard-progetto
 - `outputs/`: previsioni, rating, iperparametri e risultati del backtest.
 - File `.command`: launcher con doppio clic per l'utente (installazione, dashboard, launchd ogni 30 min con etichetta `com.forecast1x2.auto`).
 
+## Repository
+- `francyrussotti/forecast1x2`: **privato**, con codice, dati, automazione (GitHub Actions) e dashboard (Streamlit). Deve restare privato: contiene dati di terzi (quote OddsPapi, xG Sportmonks) che non si possono ridistribuire.
+- `francyrussotti/forecast1x2-code.` (con il punto finale): **pubblico**, solo codice. Si aggiorna con `.venv/bin/python scripts/pubblica_codice.py` (con `--prova` per vedere prima cosa cambierebbe), che copia i percorsi in `INCLUDE` e blocca la pubblicazione se trova dati, chiavi, email o percorsi personali. Non fare push diretti sul repository pubblico.
+
 ## Regole
 - Il token Sportmonks sta in `~/.config/forecast1x2/sportmonks_token` (o `SPORTMONKS_API_TOKEN`): non copiarlo mai nel progetto.
 - Niente leakage: nel backtest si stima solo con partite anteriori alla settimana prevista.
