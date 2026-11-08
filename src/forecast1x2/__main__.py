@@ -17,6 +17,7 @@ def main(argv=None):
     sub.add_parser("consigli-backtest", help="verifica storica della regola dei consigli in prova (over/under)")
     sub.add_parser("quote-giuste-verifica", help="stima i parametri e verifica sullo storico le quote giuste dei mercati")
     sub.add_parser("quote-planetwin", help="scarica subito le quote Planetwin365 da OddsPapi (serve la chiave)")
+    sub.add_parser("sito", help="costruisce in site/ il sito cifrato per GitHub Pages (serve SITE_PASSWORD)")
     args = p.parse_args(argv)
 
     if args.cmd == "auto":
@@ -44,6 +45,9 @@ def main(argv=None):
             elif args.cmd == "quote-giuste-verifica":
                 from .markets import run_calibration
                 run_calibration()
+            elif args.cmd == "sito":
+                from .site import build_site
+                build_site()
             elif args.cmd == "quote-planetwin":
                 from .oddspapi import update_bookmaker_odds
                 for w in update_bookmaker_odds():

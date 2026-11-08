@@ -34,3 +34,6 @@ sportmonks_token
 
 # Impostazioni locali di Claude Code
 .claude/settings.local.json
+
+# Sito cifrato per GitHub Pages (python -m forecast1x2 sito): si pubblica su un altro repository
+site/
