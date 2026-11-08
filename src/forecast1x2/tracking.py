@@ -42,11 +42,13 @@ def _uk_date(kickoff_utc) -> pd.Series:
 
 # ------------------------------------------------------------------ record
 
-def record_picks(vt: pd.DataFrame, reg: pd.DataFrame, now: pd.Timestamp) -> pd.DataFrame:
-    """Add the most probable and the cheapest pick of every match not yet in the register (one per match and kind)."""
+def record_picks(vt: pd.DataFrame, reg: pd.DataFrame, now: pd.Timestamp, suffix: str = "") -> pd.DataFrame:
+    """Add the most probable and the cheapest pick of every match not yet in the register (one per match and kind).
+
+    suffix tells versions apart, e.g. " (Planetwin365)" for the advice computed on one bookmaker only."""
     from .advisor import best_picks, cheapest_picks
-    new = pd.concat([best_picks(vt).assign(kind="più probabile"), cheapest_picks(vt).assign(kind="più conveniente")],
-                    ignore_index=True)
+    new = pd.concat([best_picks(vt).assign(kind="più probabile" + suffix),
+                     cheapest_picks(vt).assign(kind="più conveniente" + suffix)], ignore_index=True)
     if new.empty:
         return reg
     new = new[pd.to_datetime(new.kickoff_utc, utc=True) - MIN_LEAD > now]
@@ -224,6 +226,10 @@ def update_tracking(now: pd.Timestamp = None, picks_path: Path = PICKS, slips_pa
             vt = value_table(up, bk, params, {})
             if len(vt):
                 picks, slips = record_picks(vt, picks, now), record_slips(vt, slips, now)
+            pw = bk[bk.bookmaker == "planetwin365.it"] if "bookmaker" in bk else bk.iloc[:0]
+            vt_pw = value_table(up, pw, params, {}) if len(pw) else pd.DataFrame()
+            if len(vt_pw):   # the user's bookmaker: the advice they can actually play
+                picks = record_picks(vt_pw, picks, now, " (Planetwin365)")
     if (picks.status == "aperta").any() or (slips.status == "aperta").any():
         res = results_table()
         picks, slips = settle_picks(picks, res, params, now), settle_slips(slips, res, params, now)

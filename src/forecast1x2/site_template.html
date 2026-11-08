@@ -123,6 +123,9 @@ document.querySelectorAll("nav button").forEach(b => b.addEventListener("click",
 }));
 
 function stake() { return Number(store.get("f1x2-stake") || 10); }
+function book() { return store.get("f1x2-book") || "pw"; }   // "pw" = solo Planetwin365, "all" = migliore dei bookmaker
+function V() { return (D.variants && D.variants[book()]) || D; }
+function bookLabel() { return book() === "pw" ? "Planetwin365" : "migliore tra " + Object.values(D.bookmakers).join(", "); }
 function bk(k) { return k ? (D.bookmakers[k] || k) : ""; }
 
 function slipCard(title, s) {
@@ -136,15 +139,16 @@ function slipCard(title, s) {
 }
 
 function viewSlips() {
-  const ks = [...new Set(D.custom.map(c => c.k))];
-  if (!D.presets.length) return `<p class="muted">Nessuna partita con quote al momento: escono di solito il venerdì.</p>`;
+  const S = V(), ks = [...new Set(S.custom.map(c => c.k))];
+  if (!S.presets.length) return `<p class="muted">Nessuna partita con quote ${esc(bookLabel())} al momento: escono di solito il venerdì.</p>`;
   let k = Number(store.get("f1x2-k") || 2); if (!ks.includes(k)) k = ks[0];
   const obj = store.get("f1x2-obj") || "prob";
-  const targets = D.custom.filter(c => c.k === k && c.objective === obj).map(c => c.target);
+  const targets = S.custom.filter(c => c.k === k && c.objective === obj).map(c => c.target);
   let t = Number(store.get("f1x2-t") || targets[0]); if (!targets.includes(t)) t = targets[0];
-  const found = D.custom.find(c => c.k === k && c.target === t && c.objective === obj);
-  return `<div class="row"><label>Puntata € <input id="stake" type="number" min="1" step="1" value="${stake()}" style="width:80px"></label></div>
-    <h2>Le più probabili</h2><div class="grid">${D.presets.map(p => slipCard(p.name, p.slip)).join("")}</div>
+  const found = S.custom.find(c => c.k === k && c.target === t && c.objective === obj);
+  return `<div class="row"><label>Puntata € <input id="stake" type="number" min="1" step="1" value="${stake()}" style="width:80px"></label>
+    <span class="chip">Quote: ${esc(bookLabel())}</span></div>
+    <h2>Le più probabili</h2><div class="grid">${S.presets.map(p => slipCard(p.name, p.slip)).join("")}</div>
     <h2>Costruisci la tua</h2>
     <div class="row"><select id="selk">${ks.map(x => `<option value="${x}" ${x === k ? "selected" : ""}>${x} ${x === 1 ? "partita" : "partite"}</option>`).join("")}</select>
       <select id="selt">${targets.map(x => `<option value="${x}" ${x === t ? "selected" : ""}>quota ≥ ${num(x)}</option>`).join("")}</select>
@@ -165,9 +169,11 @@ function bindSlips() {
 function viewMatches() {
   if (openMatch !== null) return viewMatch(D.matches[openMatch]);
   if (!D.matches.length) return `<p class="muted">Nessuna partita con quote: escono di solito il venerdì.</p>`;
-  return D.matches.map(m => `<button class="match" data-id="${m.id}"><div class="muted">${when(m.kickoff)} · ${esc(m.league)}</div>
+  const pw = book() === "pw";
+  return D.matches.map(m => { const b = pw ? m.best_pw : m.best;
+    return `<button class="match" data-id="${m.id}"><div class="muted">${when(m.kickoff)} · ${esc(m.league)}</div>
       <div><b>${esc(m.home)} – ${esc(m.away)}</b></div>
-      <div class="muted">${m.best ? `Più probabile: <b>${esc(m.best.market)}</b> @ ${num(m.best.odds)} (${Math.round(100 * m.best.prob)}%) · ${esc(bk(m.best.bookmaker))}` : "Nessuna giocata nelle regole"}</div></button>`).join("");
+      <div class="muted">${b ? `Più probabile: <b>${esc(b.market)}</b> @ ${num(b.odds)} (${Math.round(100 * b.prob)}%) · ${esc(bk(b.bookmaker))}` : pw ? "Nessuna quota Planetwin365 nelle regole" : "Nessuna giocata nelle regole"}</div></button>`; }).join("");
 }
 
 function judge(p, fair, err, o) {
@@ -180,16 +186,17 @@ function judge(p, fair, err, o) {
 }
 
 function viewMatch(m) {
-  const groups = [...new Set(m.markets.map(x => x.g))];
+  const groups = [...new Set(m.markets.map(x => x.g))], pw = book() === "pw";
+  const oddsOf = x => pw ? x.pw : x.odds, bkOf = x => pw ? (x.pw ? "planetwin365.it" : "") : x.bk;
   const pickTxt = (lab, p) => p ? `<div><span class="muted">${lab}:</span> <b>${esc(p.market)}</b> @ ${num(p.odds)} · ${esc(bk(p.bookmaker))} · vince ${Math.round(100 * p.prob)}% · costo ${pct(p.value)}</div>` : "";
   return `<p><button class="act" id="back">‹ Partite</button></p>
     <div class="card"><div class="muted">${when(m.kickoff)} · ${esc(m.league)}</div><h3>${esc(m.home)} – ${esc(m.away)}</h3>
-      <div class="muted">Gol attesi ${num(m.xg[0])} – ${num(m.xg[1])}</div>${pickTxt("Più probabile", m.best)}${pickTxt("Più conveniente", m.cheap)}</div>
-    <p class="note">«Quota» è già compilata con la migliore tra i bookmaker seguiti: scrivi la quota del tuo per vedere il valore. «Puntata» è la percentuale del budget per le scommesse (un quarto di Kelly, al massimo il 5%).</p>
+      <div class="muted">Gol attesi ${num(m.xg[0])} – ${num(m.xg[1])}</div>${pickTxt("Più probabile", pw ? m.best_pw : m.best)}${pickTxt("Più conveniente", pw ? m.cheap_pw : m.cheap)}</div>
+    <p class="note">«Quota» è già compilata con le quote ${esc(bookLabel())} (se non c'è, quel mercato non è disponibile): puoi scriverne un'altra per vedere il valore. «Puntata» è la percentuale del budget per le scommesse (un quarto di Kelly, al massimo il 5%).</p>
     ${groups.map(g => `<h2>${esc(g)}</h2><div class="scroll"><table><tr><th>Mercato</th><th class="num">Prob.</th><th class="num">Giusta</th><th class="num">Quota</th><th>Valore</th><th class="num">Puntata</th></tr>
-      ${m.markets.map((x, i) => x.g !== g ? "" : `<tr data-i="${i}"><td>${esc(x.m)}${x.bk ? `<div class="muted">${esc(bk(x.bk))}</div>` : ""}</td>
+      ${m.markets.map((x, i) => x.g !== g ? "" : `<tr data-i="${i}"><td>${esc(x.m)}${bkOf(x) && !pw ? `<div class="muted">${esc(bk(bkOf(x)))}</div>` : ""}</td>
         <td class="num">${Math.round(100 * x.p)}%</td><td class="num">${num(x.fair)}</td>
-        <td class="num"><input inputmode="decimal" value="${x.odds ? num(x.odds) : ""}"></td><td class="val"></td><td class="num stk"></td></tr>`).join("")}</table></div>`).join("")}
+        <td class="num"><input inputmode="decimal" value="${oddsOf(x) ? num(oddsOf(x)) : ""}"></td><td class="val"></td><td class="num stk"></td></tr>`).join("")}</table></div>`).join("")}
     ${m.exotic.length ? `<h2>Combo e Multigoal da cercare</h2><div class="scroll"><table><tr><th>Mercato</th><th class="num">Prob.</th><th class="num">Giusta</th><th class="num">Gioca solo da</th></tr>
       ${m.exotic.map(e => `<tr><td>${esc(e.g)}: ${esc(e.m)}</td><td class="num">${Math.round(100 * e.p)}%</td><td class="num">${num(e.fair)}</td><td class="num">${num(e.min)}</td></tr>`).join("")}</table></div>` : ""}`;
 }
@@ -255,6 +262,10 @@ function viewInfo() {
     <p>La giocata più probabile di ogni partita, con quota tra ${num(D.rules.min_odds)} e ${num(D.rules.max_odds)} e costo atteso non peggiore di ${pct(-D.rules.max_cost, 0)}, presa al bookmaker con la quota migliore tra ${esc(Object.values(D.bookmakers).join(", "))}. Mai due giocate della stessa partita in una multipla (per quello ci sono i Combo). Al massimo 2-3 partite: ogni partita in più moltiplica il margine del bookmaker.</p>
     <h2>Lo storico (verifica 2024/25-2025/26)</h2><table><tr><th>Come giocare</th><th class="num">Vinte</th><th class="num">Rendimento</th></tr>
     ${D.history.map(h => `<tr><td>${esc(h[0])}</td><td class="num">${esc(h[1])}</td><td class="num">${esc(h[2])}</td></tr>`).join("")}</table>
+    <h2>Il tuo bookmaker</h2>
+    <p><select id="selbook"><option value="pw" ${book() === "pw" ? "selected" : ""}>Solo Planetwin365</option>
+      <option value="all" ${book() === "all" ? "selected" : ""}>Migliore tra ${esc(Object.values(D.bookmakers).join(", "))}</option></select></p>
+    <p class="muted">Schedine, giocate e quote delle partite usano solo le quote del bookmaker scelto.</p>
     <h2>Su iPhone</h2><p>In Safari: Condividi → «Aggiungi alla schermata Home». Si apre come un'app.</p>
     <p><button class="act" id="logout">Esci e dimentica la password</button></p>`;
 }
@@ -265,7 +276,10 @@ function render() {
   $("#view").innerHTML = tab === "slips" ? viewSlips() : tab === "matches" ? viewMatches() : tab === "track" ? viewTrack() : viewInfo();
   if (tab === "slips") bindSlips();
   if (tab === "matches") bindMatches();
-  if (tab === "info") $("#logout").addEventListener("click", () => { store.del("f1x2-pw"); location.reload(); });
+  if (tab === "info") {
+    $("#logout").addEventListener("click", () => { store.del("f1x2-pw"); location.reload(); });
+    $("#selbook").addEventListener("change", e => { store.set("f1x2-book", e.target.value); render(); });
+  }
 }
 
 const saved = store.get("f1x2-pw");

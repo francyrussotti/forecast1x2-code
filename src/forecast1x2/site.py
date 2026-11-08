@@ -27,6 +27,7 @@ LEAGUE_NAMES = {**{d: v[0] for d, v in LEAGUES.items()}, "I2": "Serie B", "E1": 
                 "SP2": "La Liga 2", "D2": "2. Bundesliga", "F2": "Ligue 2"}
 SHOWN_GROUPS = ["1X2", "Doppia chance", "Under/Over", "Goal/No goal", "Multigoal", "Combo 1X2 + U/O",
                 "Combo DC + U/O", "Combo DC + GG/NG", "Combo DC + Multigoal", "Primo tempo", "Under/Over squadra"]
+PW_BOOK = "planetwin365.it"   # the bookmaker the user plays on: the default version of the advice
 CUSTOM_SLIPS = [(1, 1.5), (1, 2.0), (2, 1.5), (2, 2.0), (2, 3.0), (3, 2.5), (3, 3.0), (3, 5.0), (4, 5.0), (5, 8.0)]
 DISCLAIMER = ("Le previsioni non sono consigli di scommessa: nessun modo di giocare ha guadagnato in modo affidabile "
               "nello storico. Il gioco può causare dipendenza.")
@@ -170,43 +171,54 @@ def site_data(now: pd.Timestamp = None) -> dict:
     up, bk = _read(FAIR_ODDS_OUT), _read(BOOKMAKER_ODDS)
     if len(up):
         up = up[pd.to_datetime(up.kickoff_utc, utc=True) > now].sort_values("kickoff_utc")
-    vt = value_table(up, bk, params, err) if len(up) and len(bk) else pd.DataFrame()
-
-    best = best_prices(bk) if len(bk) else bk
-    bp = advisor.best_picks(vt) if len(vt) else vt
-    cp = advisor.cheapest_picks(vt) if len(vt) else vt
+    # two versions of every piece of advice: only Planetwin365 (the user's bookmaker) and the best of all
     key = lambda df: {(r.league, r.home, r.away): r for r in df.itertuples()} if len(df) else {}
-    bpk, cpk = key(bp), key(cp)
+    V = {}
+    for name, b_ in {"pw": bk[bk.bookmaker == PW_BOOK] if len(bk) else bk, "all": bk}.items():
+        vt_ = value_table(up, b_, params, err) if len(up) and len(b_) else pd.DataFrame()
+        V[name] = {"vt": vt_, "best": best_prices(b_) if len(b_) else b_,
+                   "bp": key(advisor.best_picks(vt_)) if len(vt_) else {},
+                   "cp": key(advisor.cheapest_picks(vt_)) if len(vt_) else {}}
+    pick = lambda p: None if p is None else {"group": p.group, "market": p.market, "odds": _f(p.odds, 3),
+                                              "bookmaker": p.bookmaker, "prob": _f(p.prob), "value": _f(p.value)}
     matches = []
     for i, r in enumerate(up.itertuples()):
         fo = fair_odds_for(pd.Series(r._asdict()), params)
         fo = fo[fo.group.isin(SHOWN_GROUPS)]
-        b = best[(best.league == r.league) & (best.home == r.home) & (best.away == r.away)] if len(best) else best
-        prices = {(g, m): (o, k) for g, m, o, k in zip(b.group, b.market, b.odds, b.bookmaker)} if len(b) else {}
+        prices = {}
+        for name, v in V.items():
+            b = v["best"]
+            b = b[(b.league == r.league) & (b.home == r.home) & (b.away == r.away)] if len(b) else b
+            prices[name] = {(g, m): (o, k) for g, m, o, k in zip(b.group, b.market, b.odds, b.bookmaker)} if len(b) else {}
         mk = []
         for f in fo.itertuples():
-            o, k = prices.get((f.group, f.market), (None, None))
+            o, k = prices["all"].get((f.group, f.market), (None, None))
             mk.append({"g": f.group, "m": f.market, "p": _f(f.prob), "fair": _f(f.fair_odds, 3),
-                       "err": _f(err.get((f.group, f.market)), 2), "odds": _f(o, 3), "bk": k})
+                       "err": _f(err.get((f.group, f.market)), 2), "odds": _f(o, 3), "bk": k,
+                       "pw": _f(prices["pw"].get((f.group, f.market), (None, None))[0], 3)})
         ex = advisor.exotic_suggestions(fair_odds_for(pd.Series(r._asdict()), params))
-        pick = lambda p: None if p is None else {"group": p.group, "market": p.market, "odds": _f(p.odds, 3),
-                                                  "bookmaker": p.bookmaker, "prob": _f(p.prob), "value": _f(p.value)}
         k3 = (r.league, r.home, r.away)
         matches.append({"id": i, "league": LEAGUE_NAMES.get(r.league, r.league), "kickoff": r.kickoff_utc,
                         "home": r.home, "away": r.away, "xg": [_f(r.exp_home, 2), _f(r.exp_away, 2)],
-                        "best": pick(bpk.get(k3)), "cheap": pick(cpk.get(k3)), "markets": mk,
+                        "best": pick(V["all"]["bp"].get(k3)), "cheap": pick(V["all"]["cp"].get(k3)),
+                        "best_pw": pick(V["pw"]["bp"].get(k3)), "cheap_pw": pick(V["pw"]["cp"].get(k3)),
+                        "markets": mk,
                         "exotic": [{"g": e.group, "m": e.market, "p": _f(e.prob), "fair": _f(e.fair_odds, 3),
                                     "min": _f(e.fair_odds * (1 - advisor.MAX_COST), 2)} for e in ex.itertuples()]})
 
-    presets, custom = [], []
-    if len(vt):
-        for name, (k, target) in advisor.PRESETS.items():
-            m = advisor.best_multiple(vt, k, target)
-            presets.append({"name": name, "slip": _slip(m) if m else None})
-        for k, target in CUSTOM_SLIPS:
-            for obj in ("prob", "value"):
-                custom.append({"k": k, "target": target, "objective": obj,
-                               "slips": [_slip(m) for m in advisor.alternative_slips(vt, k, target, 3, obj)]})
+    variants = {}
+    for name, v in V.items():
+        presets, custom = [], []
+        if len(v["vt"]):
+            for pname, (k, target) in advisor.PRESETS.items():
+                m = advisor.best_multiple(v["vt"], k, target)
+                presets.append({"name": pname, "slip": _slip(m) if m else None})
+            for k, target in CUSTOM_SLIPS:
+                for obj in ("prob", "value"):
+                    custom.append({"k": k, "target": target, "objective": obj,
+                                   "slips": [_slip(m) for m in advisor.alternative_slips(v["vt"], k, target, 3, obj)]})
+        variants[name] = {"presets": presets, "custom": custom}
+    presets, custom = variants["all"]["presets"], variants["all"]["custom"]
 
     picks, slips = _read(PICKS), _read(SLIPS)
     ou = load_register()
@@ -234,7 +246,7 @@ def site_data(now: pd.Timestamp = None) -> dict:
     return {"updated": meta.get("data_updated_at"), "odds_fetched": bk.fetched_at.max() if len(bk) else None,
             "bookmakers": BOOKMAKERS, "disclaimer": DISCLAIMER, "history": HISTORY,
             "rules": {"min_odds": advisor.MIN_ODDS, "max_odds": advisor.MAX_ODDS, "max_cost": advisor.MAX_COST},
-            "matches": matches, "presets": presets, "custom": custom, "tracking": tracking}
+            "matches": matches, "presets": presets, "custom": custom, "variants": variants, "tracking": tracking}
 
 
 # -------------------------------------------------------------------- build
