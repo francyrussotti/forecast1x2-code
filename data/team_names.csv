@@ -1,0 +1,314 @@
+league,source,source_name,canonical
+I1,fixturedownload,Atalanta,Atalanta
+I1,fixturedownload,Bologna,Bologna
+I1,fixturedownload,Cagliari,Cagliari
+I1,fixturedownload,Como,Como
+I1,fixturedownload,Fiorentina,Fiorentina
+I1,fixturedownload,Frosinone,Frosinone
+I1,fixturedownload,Genoa,Genoa
+I1,fixturedownload,Internazionale,Inter
+I1,fixturedownload,Juventus,Juventus
+I1,fixturedownload,Lazio,Lazio
+I1,fixturedownload,Lecce,Lecce
+I1,fixturedownload,Milan,Milan
+I1,fixturedownload,Monza,Monza
+I1,fixturedownload,Napoli,Napoli
+I1,fixturedownload,Parma,Parma
+I1,fixturedownload,Roma,Roma
+I1,fixturedownload,Sassuolo,Sassuolo
+I1,fixturedownload,Torino,Torino
+I1,fixturedownload,Udinese,Udinese
+I1,fixturedownload,Venezia,Venezia
+I1,openfootball,AC Milan,Milan
+I1,openfootball,AC Monza,Monza
+I1,openfootball,ACF Fiorentina,Fiorentina
+I1,openfootball,AS Roma,Roma
+I1,openfootball,Atalanta BC,Atalanta
+I1,openfootball,Bologna FC 1909,Bologna
+I1,openfootball,Cagliari Calcio,Cagliari
+I1,openfootball,Como 1907,Como
+I1,openfootball,FC Internazionale Milano,Inter
+I1,openfootball,Frosinone Calcio,Frosinone
+I1,openfootball,Genoa CFC,Genoa
+I1,openfootball,Juventus FC,Juventus
+I1,openfootball,Parma Calcio 1913,Parma
+I1,openfootball,SS Lazio,Lazio
+I1,openfootball,SSC Napoli,Napoli
+I1,openfootball,Torino FC,Torino
+I1,openfootball,US Lecce,Lecce
+I1,openfootball,US Sassuolo Calcio,Sassuolo
+I1,openfootball,Udinese Calcio,Udinese
+I1,openfootball,Venezia FC,Venezia
+E0,fixturedownload,Arsenal,Arsenal
+E0,fixturedownload,Aston Villa,Aston Villa
+E0,fixturedownload,Bournemouth,Bournemouth
+E0,fixturedownload,Brentford,Brentford
+E0,fixturedownload,Brighton,Brighton
+E0,fixturedownload,Chelsea,Chelsea
+E0,fixturedownload,Coventry,Coventry
+E0,fixturedownload,Crystal Palace,Crystal Palace
+E0,fixturedownload,Everton,Everton
+E0,fixturedownload,Fulham,Fulham
+E0,fixturedownload,Hull,Hull
+E0,fixturedownload,Ipswich,Ipswich
+E0,fixturedownload,Leeds,Leeds
+E0,fixturedownload,Liverpool,Liverpool
+E0,fixturedownload,Man City,Man City
+E0,fixturedownload,Man Utd,Man United
+E0,fixturedownload,Newcastle,Newcastle
+E0,fixturedownload,Nott'm Forest,Nott'm Forest
+E0,fixturedownload,Spurs,Tottenham
+E0,fixturedownload,Sunderland,Sunderland
+E0,openfootball,AFC Bournemouth,Bournemouth
+E0,openfootball,Arsenal FC,Arsenal
+E0,openfootball,Aston Villa FC,Aston Villa
+E0,openfootball,Brentford FC,Brentford
+E0,openfootball,Brighton & Hove Albion FC,Brighton
+E0,openfootball,Chelsea FC,Chelsea
+E0,openfootball,Coventry City FC,Coventry
+E0,openfootball,Crystal Palace FC,Crystal Palace
+E0,openfootball,Everton FC,Everton
+E0,openfootball,Fulham FC,Fulham
+E0,openfootball,Hull City AFC,Hull
+E0,openfootball,Ipswich Town FC,Ipswich
+E0,openfootball,Leeds United FC,Leeds
+E0,openfootball,Liverpool FC,Liverpool
+E0,openfootball,Manchester City FC,Man City
+E0,openfootball,Manchester United FC,Man United
+E0,openfootball,Newcastle United FC,Newcastle
+E0,openfootball,Nottingham Forest FC,Nott'm Forest
+E0,openfootball,Sunderland AFC,Sunderland
+E0,openfootball,Tottenham Hotspur FC,Tottenham
+SP1,fixturedownload,Athletic Club,Ath Bilbao
+SP1,fixturedownload,Atlético de Madrid,Ath Madrid
+SP1,fixturedownload,CA Osasuna,Osasuna
+SP1,fixturedownload,Celta,Celta
+SP1,fixturedownload,Deportivo Alavés,Alaves
+SP1,fixturedownload,Elche CF,Elche
+SP1,fixturedownload,FC Barcelona,Barcelona
+SP1,fixturedownload,Getafe CF,Getafe
+SP1,fixturedownload,Levante UD,Levante
+SP1,fixturedownload,Málaga CF,Malaga
+SP1,fixturedownload,R. Racing Club,Santander
+SP1,fixturedownload,RC Deportivo,La Coruna
+SP1,fixturedownload,RCD Espanyol de Barcelona,Espanol
+SP1,fixturedownload,Rayo Vallecano,Vallecano
+SP1,fixturedownload,Real Betis,Betis
+SP1,fixturedownload,Real Madrid,Real Madrid
+SP1,fixturedownload,Real Sociedad,Sociedad
+SP1,fixturedownload,Sevilla FC,Sevilla
+SP1,fixturedownload,Valencia CF,Valencia
+SP1,fixturedownload,Villarreal CF,Villarreal
+SP1,openfootball,Athletic Club,Ath Bilbao
+SP1,openfootball,CA Osasuna,Osasuna
+SP1,openfootball,Club Atlético de Madrid,Ath Madrid
+SP1,openfootball,Deportivo Alavés,Alaves
+SP1,openfootball,Elche CF,Elche
+SP1,openfootball,FC Barcelona,Barcelona
+SP1,openfootball,Getafe CF,Getafe
+SP1,openfootball,Levante UD,Levante
+SP1,openfootball,Málaga CF,Malaga
+SP1,openfootball,RC Celta de Vigo,Celta
+SP1,openfootball,RC Deportivo La Coruña,La Coruna
+SP1,openfootball,RCD Espanyol de Barcelona,Espanol
+SP1,openfootball,Rayo Vallecano de Madrid,Vallecano
+SP1,openfootball,Real Betis Balompié,Betis
+SP1,openfootball,Real Madrid CF,Real Madrid
+SP1,openfootball,Real Racing Club de Santander,Santander
+SP1,openfootball,Real Sociedad de Fútbol,Sociedad
+SP1,openfootball,Sevilla FC,Sevilla
+SP1,openfootball,Valencia CF,Valencia
+SP1,openfootball,Villarreal CF,Villarreal
+D1,fixturedownload,1. FC Köln,FC Koln
+D1,fixturedownload,1. FC Union Berlin,Union Berlin
+D1,fixturedownload,1. FSV Mainz 05,Mainz
+D1,fixturedownload,Bayer 04 Leverkusen,Leverkusen
+D1,fixturedownload,Borussia Dortmund,Dortmund
+D1,fixturedownload,Borussia Mönchengladbach,M'gladbach
+D1,fixturedownload,Eintracht Frankfurt,Ein Frankfurt
+D1,fixturedownload,FC Augsburg,Augsburg
+D1,fixturedownload,FC Bayern München,Bayern Munich
+D1,fixturedownload,FC Schalke 04,Schalke 04
+D1,fixturedownload,Hamburger SV,Hamburg
+D1,fixturedownload,RB Leipzig,RB Leipzig
+D1,fixturedownload,SC Paderborn 07,Paderborn
+D1,fixturedownload,SV Elversberg,Elversberg
+D1,fixturedownload,SV Werder Bremen,Werder Bremen
+D1,fixturedownload,Sport-Club Freiburg,Freiburg
+D1,fixturedownload,TSG Hoffenheim,Hoffenheim
+D1,fixturedownload,VfB Stuttgart,Stuttgart
+D1,openfootball,1. FC Köln,FC Koln
+D1,openfootball,1. FC Union Berlin,Union Berlin
+D1,openfootball,1. FSV Mainz 05,Mainz
+D1,openfootball,Bayer 04 Leverkusen,Leverkusen
+D1,openfootball,Borussia Dortmund,Dortmund
+D1,openfootball,Borussia Mönchengladbach,M'gladbach
+D1,openfootball,Eintracht Frankfurt,Ein Frankfurt
+D1,openfootball,FC Augsburg,Augsburg
+D1,openfootball,FC Bayern München,Bayern Munich
+D1,openfootball,FC Schalke 04,Schalke 04
+D1,openfootball,Hamburger SV,Hamburg
+D1,openfootball,RB Leipzig,RB Leipzig
+D1,openfootball,SC Freiburg,Freiburg
+D1,openfootball,SC Paderborn 07,Paderborn
+D1,openfootball,SV 07 Elversberg,Elversberg
+D1,openfootball,SV Werder Bremen,Werder Bremen
+D1,openfootball,TSG 1899 Hoffenheim,Hoffenheim
+D1,openfootball,VfB Stuttgart,Stuttgart
+F1,fixturedownload,AJ Auxerre,Auxerre
+F1,fixturedownload,AS Monaco,Monaco
+F1,fixturedownload,Angers SCO,Angers
+F1,fixturedownload,Estac Troyes,Troyes
+F1,fixturedownload,FC Lorient,Lorient
+F1,fixturedownload,Havre Athletic Club,Le Havre
+F1,fixturedownload,LOSC Lille,Lille
+F1,fixturedownload,Le Mans FC,Le Mans
+F1,fixturedownload,OGC Nice,Nice
+F1,fixturedownload,Olympique Lyonnais,Lyon
+F1,fixturedownload,Olympique de Marseille,Marseille
+F1,fixturedownload,Paris FC,Paris FC
+F1,fixturedownload,Paris Saint-Germain,Paris SG
+F1,fixturedownload,RC Lens,Lens
+F1,fixturedownload,RC Strasbourg Alsace,Strasbourg
+F1,fixturedownload,Stade Brestois 29,Brest
+F1,fixturedownload,Stade Rennais FC,Rennes
+F1,fixturedownload,Toulouse FC,Toulouse
+F1,openfootball,AJ Auxerre,Auxerre
+F1,openfootball,AS Monaco FC,Monaco
+F1,openfootball,Angers SCO,Angers
+F1,openfootball,ES Troyes AC,Troyes
+F1,openfootball,FC Lorient,Lorient
+F1,openfootball,Le Havre AC,Le Havre
+F1,openfootball,Le Mans FC,Le Mans
+F1,openfootball,Lille OSC,Lille
+F1,openfootball,OGC Nice,Nice
+F1,openfootball,Olympique Lyonnais,Lyon
+F1,openfootball,Olympique de Marseille,Marseille
+F1,openfootball,Paris FC,Paris FC
+F1,openfootball,Paris Saint-Germain FC,Paris SG
+F1,openfootball,RC Strasbourg Alsace,Strasbourg
+F1,openfootball,Racing Club de Lens,Lens
+F1,openfootball,Stade Brestois 29,Brest
+F1,openfootball,Stade Rennais FC 1901,Rennes
+F1,openfootball,Toulouse FC,Toulouse
+I1,sportmonks,AC Milan,Milan
+I1,sportmonks,Atalanta,Atalanta
+I1,sportmonks,Bologna,Bologna
+I1,sportmonks,Cagliari,Cagliari
+I1,sportmonks,Como,Como
+I1,sportmonks,Cremonese,Cremonese
+I1,sportmonks,Empoli,Empoli
+I1,sportmonks,Fiorentina,Fiorentina
+I1,sportmonks,Frosinone,Frosinone
+I1,sportmonks,Genoa,Genoa
+I1,sportmonks,Hellas Verona,Verona
+I1,sportmonks,Inter,Inter
+I1,sportmonks,Juventus,Juventus
+I1,sportmonks,Lazio,Lazio
+I1,sportmonks,Lecce,Lecce
+I1,sportmonks,Monza,Monza
+I1,sportmonks,Napoli,Napoli
+I1,sportmonks,Parma,Parma
+I1,sportmonks,Pisa,Pisa
+I1,sportmonks,Roma,Roma
+I1,sportmonks,Sassuolo,Sassuolo
+I1,sportmonks,Torino,Torino
+I1,sportmonks,Udinese,Udinese
+I1,sportmonks,Venezia,Venezia
+E0,sportmonks,AFC Bournemouth,Bournemouth
+E0,sportmonks,Arsenal,Arsenal
+E0,sportmonks,Aston Villa,Aston Villa
+E0,sportmonks,Brentford,Brentford
+E0,sportmonks,Brighton & Hove Albion,Brighton
+E0,sportmonks,Burnley,Burnley
+E0,sportmonks,Chelsea,Chelsea
+E0,sportmonks,Coventry City,Coventry
+E0,sportmonks,Crystal Palace,Crystal Palace
+E0,sportmonks,Everton,Everton
+E0,sportmonks,Fulham,Fulham
+E0,sportmonks,Hull City,Hull
+E0,sportmonks,Ipswich Town,Ipswich
+E0,sportmonks,Leeds United,Leeds
+E0,sportmonks,Leicester City,Leicester
+E0,sportmonks,Liverpool,Liverpool
+E0,sportmonks,Manchester City,Man City
+E0,sportmonks,Manchester United,Man United
+E0,sportmonks,Newcastle United,Newcastle
+E0,sportmonks,Nottingham Forest,Nott'm Forest
+E0,sportmonks,Southampton,Southampton
+E0,sportmonks,Sunderland,Sunderland
+E0,sportmonks,Tottenham Hotspur,Tottenham
+E0,sportmonks,West Ham United,West Ham
+E0,sportmonks,Wolverhampton Wanderers,Wolves
+SP1,sportmonks,Athletic Club,Ath Bilbao
+SP1,sportmonks,Atlético de Madrid,Ath Madrid
+SP1,sportmonks,Celta de Vigo,Celta
+SP1,sportmonks,Deportivo A Coruña,La Coruna
+SP1,sportmonks,Deportivo Alavés,Alaves
+SP1,sportmonks,Elche,Elche
+SP1,sportmonks,Espanyol,Espanol
+SP1,sportmonks,FC Barcelona,Barcelona
+SP1,sportmonks,Getafe,Getafe
+SP1,sportmonks,Girona,Girona
+SP1,sportmonks,Las Palmas,Las Palmas
+SP1,sportmonks,Leganés,Leganes
+SP1,sportmonks,Levante,Levante
+SP1,sportmonks,Mallorca,Mallorca
+SP1,sportmonks,Málaga,Malaga
+SP1,sportmonks,Osasuna,Osasuna
+SP1,sportmonks,Racing Santander,Santander
+SP1,sportmonks,Rayo Vallecano,Vallecano
+SP1,sportmonks,Real Betis,Betis
+SP1,sportmonks,Real Madrid,Real Madrid
+SP1,sportmonks,Real Oviedo,Oviedo
+SP1,sportmonks,Real Sociedad,Sociedad
+SP1,sportmonks,Real Valladolid,Valladolid
+SP1,sportmonks,Sevilla,Sevilla
+SP1,sportmonks,Valencia,Valencia
+SP1,sportmonks,Villarreal,Villarreal
+D1,sportmonks,Bayer 04 Leverkusen,Leverkusen
+D1,sportmonks,Borussia Dortmund,Dortmund
+D1,sportmonks,Borussia Mönchengladbach,M'gladbach
+D1,sportmonks,Eintracht Frankfurt,Ein Frankfurt
+D1,sportmonks,Elversberg,Elversberg
+D1,sportmonks,FC Augsburg,Augsburg
+D1,sportmonks,FC Bayern München,Bayern Munich
+D1,sportmonks,FC Heidenheim,Heidenheim
+D1,sportmonks,FC Köln,FC Koln
+D1,sportmonks,FC Union Berlin,Union Berlin
+D1,sportmonks,FSV Mainz 05,Mainz
+D1,sportmonks,Hamburger SV,Hamburg
+D1,sportmonks,Holstein Kiel,Holstein Kiel
+D1,sportmonks,Paderborn,Paderborn
+D1,sportmonks,RB Leipzig,RB Leipzig
+D1,sportmonks,SC Freiburg,Freiburg
+D1,sportmonks,Schalke 04,Schalke 04
+D1,sportmonks,St. Pauli,St Pauli
+D1,sportmonks,TSG Hoffenheim,Hoffenheim
+D1,sportmonks,VfB Stuttgart,Stuttgart
+D1,sportmonks,VfL Bochum 1848,Bochum
+D1,sportmonks,VfL Wolfsburg,Wolfsburg
+D1,sportmonks,Werder Bremen,Werder Bremen
+F1,sportmonks,Angers SCO,Angers
+F1,sportmonks,Auxerre,Auxerre
+F1,sportmonks,Brest,Brest
+F1,sportmonks,LOSC Lille,Lille
+F1,sportmonks,Le Havre,Le Havre
+F1,sportmonks,Le Mans,Le Mans
+F1,sportmonks,Lens,Lens
+F1,sportmonks,Lorient,Lorient
+F1,sportmonks,Metz,Metz
+F1,sportmonks,Monaco,Monaco
+F1,sportmonks,Montpellier,Montpellier
+F1,sportmonks,Nantes,Nantes
+F1,sportmonks,Nice,Nice
+F1,sportmonks,Olympique Lyonnais,Lyon
+F1,sportmonks,Olympique Marseille,Marseille
+F1,sportmonks,Paris,Paris FC
+F1,sportmonks,Paris Saint Germain,Paris SG
+F1,sportmonks,Reims,Reims
+F1,sportmonks,Rennes,Rennes
+F1,sportmonks,Saint-Étienne,St Etienne
+F1,sportmonks,Strasbourg,Strasbourg
+F1,sportmonks,Toulouse,Toulouse
+F1,sportmonks,Troyes,Troyes

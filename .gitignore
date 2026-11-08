@@ -1,0 +1,36 @@
+# Ambiente Python: si ricrea con installa.command o pip install -r requirements.txt
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Registro dell'aggiornamento automatico, specifico di questo Mac
+logs/
+
+# xG Sportmonks della stagione in corso: 3 MB su una riga, riscaricato a ogni aggiornamento
+# (su git peserebbe ~1 GB l'anno). Resta su git xg.csv, usato se Sportmonks non risponde.
+# A inizio stagione nuova: aggiornare l'anno qui e aggiungere a git il file della stagione chiusa.
+data/raw/xg_sportmonks_2627.json
+
+# Lucchetti degli aggiornamenti in corso
+outputs/*.lock
+
+# File di sistema macOS
+.DS_Store
+._*
+
+# Cartella vuota
+avviare/
+
+# Segreti: il token Sportmonks sta fuori dal progetto, ma per sicurezza
+.env
+*.token
+sportmonks_token
+.streamlit/secrets.toml
+
+# Copia del codice per il repository pubblico (scripts/pubblica_codice.py)
+.public-mirror/
+
+# Impostazioni locali di Claude Code
+.claude/settings.local.json

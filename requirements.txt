@@ -1,0 +1,7 @@
+numpy>=1.26,<2.1
+pandas>=2.2,<2.3
+scipy>=1.13,<1.14
+requests>=2.31
+streamlit>=1.38,<1.51
+altair>=5,<6
+pytest>=8
