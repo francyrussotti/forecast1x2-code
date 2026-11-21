@@ -1,0 +1,768 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Forecast 1X2</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Forecast 1X2">
+<meta name="theme-color" content="#16804c">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root { --bg:#f6f7f5; --card:#fff; --ink:#18201b; --muted:#5d6b62; --line:#e2e6e3; --accent:#16804c;
+        --good:#14804a; --bad:#b4372f; --warn:#9a6a00; --chip:#eef3ef; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0f1712; --card:#17221b; --ink:#e8efe9; --muted:#9db0a3; --line:#26352b; --accent:#3ccf85;
+          --good:#3ccf85; --bad:#ff7a6e; --warn:#e8b33f; --chip:#1f2e25; } }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+       padding:env(safe-area-inset-top) 0 calc(24px + env(safe-area-inset-bottom)); }
+header { padding:14px 16px 6px; position:sticky; top:0; z-index:6; background:var(--bg); }
+.head { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+#burger { flex:none; width:44px; height:44px; border:1px solid var(--line); border-radius:12px; background:var(--card);
+          color:var(--ink); display:grid; place-items:center; padding:0; }
+#burger span, #burger span::before, #burger span::after { display:block; width:20px; height:2px; border-radius:2px;
+          background:currentColor; position:relative; content:""; }
+#burger span::before { position:absolute; top:-6px; } #burger span::after { position:absolute; top:6px; }
+#burger[aria-expanded="true"] span { background:transparent; }
+#burger[aria-expanded="true"] span::before { top:0; transform:rotate(45deg); }
+#burger[aria-expanded="true"] span::after { top:0; transform:rotate(-45deg); }
+#shade { position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:7; }
+h1 { font-size:22px; margin:0; } h2 { font-size:17px; margin:22px 0 8px; } h3 { font-size:15px; margin:0 0 6px; }
+.muted { color:var(--muted); font-size:13px; }
+main { padding:0 16px; max-width:900px; margin:0 auto; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin:10px 0; }
+.grid { display:grid; gap:10px; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); }
+.leg { padding:6px 0; border-bottom:1px solid var(--line); } .leg:last-of-type { border-bottom:0; }
+.big { font-size:22px; font-weight:700; }
+.chip { display:inline-block; background:var(--chip); border-radius:999px; padding:1px 8px; font-size:12px; margin-right:4px; }
+.good { color:var(--good); } .bad { color:var(--bad); } .warn { color:var(--warn); }
+nav { position:fixed; top:calc(env(safe-area-inset-top) + 66px); right:max(12px, env(safe-area-inset-right)); width:min(280px, calc(100vw - 24px));
+      background:var(--card); border:1px solid var(--line); border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.25);
+      padding:6px; z-index:8; display:flex; flex-direction:column; }
+nav button { background:none; border:0; color:var(--ink); padding:13px 14px; text-align:left; font-size:16px; border-radius:10px; }
+nav button + button { border-top:1px solid var(--line); border-radius:0; }
+select, input, textarea { max-width:100%; } select { text-overflow:ellipsis; }
+html, body { overflow-x:hidden; }
+nav button.on { color:var(--accent); font-weight:700; background:var(--chip); border-radius:10px; }
+input, select, button.act { font:inherit; color:inherit; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:8px 10px; }
+button.act { background:var(--accent); color:#fff; border:0; font-weight:600; }
+table { width:100%; border-collapse:collapse; font-size:14px; }
+th, td { text-align:left; padding:6px 4px; border-bottom:1px solid var(--line); vertical-align:top; }
+th { color:var(--muted); font-weight:600; font-size:12px; }
+td.num, th.num { text-align:right; white-space:nowrap; }
+td input { width:64px; padding:4px 6px; text-align:right; }
+.scroll { overflow-x:auto; }
+.row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.match { display:block; width:100%; text-align:left; background:var(--card); border:1px solid var(--line); border-radius:12px;
+         padding:10px 12px; margin:8px 0; color:inherit; font:inherit; }
+.segs { display:flex; background:var(--chip); border-radius:12px; padding:3px; margin:10px 0; }
+.segs button.seg { flex:1; border:0; background:none; color:inherit; font:inherit; padding:8px; border-radius:10px; }
+.segs button.seg.on { background:var(--card); font-weight:700; color:var(--accent); box-shadow:0 1px 3px rgba(0,0,0,.15); }
+h2.cal-day { font-size:15px; margin:18px 0 4px; } h2.cal-day::first-letter { text-transform:uppercase; }
+.cal-row { display:grid; grid-template-columns:52px 1fr; gap:8px; padding:8px 4px; border-bottom:1px solid var(--line); }
+.cal-link { cursor:pointer; } .cal-link:hover { background:var(--chip); border-radius:8px; }
+.cal-h { font-variant-numeric:tabular-nums; font-weight:600; padding-top:1px; }
+.cal-m { min-width:0; } .cal-m b { overflow-wrap:anywhere; }
+.cal-p { display:flex; gap:6px; margin-top:4px; font-size:12px; } .cal-p span { background:var(--chip); border-radius:999px; padding:1px 8px; }
+#lock { max-width:360px; margin:18vh auto 0; padding:0 16px; }
+#lock input[type=password] { width:100%; margin:10px 0; }
+.hidden { display:none !important; }
+.note { background:var(--chip); border-radius:12px; padding:10px 12px; font-size:13px; color:var(--muted); }
+.trust { border:2px solid var(--accent); }
+.headline { font-size:20px; font-weight:700; line-height:1.3; margin:4px 0 8px; }
+.bars { margin:10px 0 4px; } .bar { display:grid; grid-template-columns:96px 1fr 44px; gap:8px; align-items:center; margin:6px 0; font-size:13px; }
+.track { position:relative; height:12px; background:var(--chip); border-radius:999px; overflow:hidden; }
+.fill { position:absolute; left:0; top:0; bottom:0; border-radius:999px; }
+.fill.pred { background:var(--muted); opacity:.45; } .fill.real { background:var(--accent); height:6px; top:3px; }
+.badge { display:inline-block; border-radius:999px; padding:2px 10px; font-weight:700; font-size:13px; color:#fff; background:var(--accent); }
+.surv { display:grid; grid-template-columns:1fr auto; gap:4px 10px; align-items:center; }
+.surv.used { opacity:.5; } .surv.top { border:2px solid var(--accent); }
+.badge.mid { background:var(--warn); } .badge.low { background:var(--bad); }
+.eq { font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:13px; background:var(--chip); border-radius:10px;
+      padding:8px 10px; overflow-x:auto; white-space:pre-wrap; overflow-wrap:anywhere; margin:6px 0; }
+.step { display:inline-block; min-width:22px; text-align:center; border-radius:999px; background:var(--accent); color:#fff;
+        font-size:12px; font-weight:700; margin-right:6px; }
+
+</style>
+</head>
+<body>
+<div id="lock">
+  <h1>Forecast 1X2</h1>
+  <p class="muted">Contenuto protetto. Scrivi la password.</p>
+  <form id="lockform">
+    <input id="pw" type="password" autocomplete="current-password" placeholder="Password" required>
+    <label class="row muted"><input id="remember" type="checkbox" checked> Ricorda su questo dispositivo</label>
+    <p><button class="act" type="submit">Entra</button></p>
+    <p id="lockmsg" class="bad"></p>
+  </form>
+</div>
+<div id="app" class="hidden">
+  <header><div class="head"><h1 id="title">Schedine pronte</h1>
+    <button id="burger" aria-label="Menu" aria-expanded="false" aria-controls="menu"><span></span></button></div>
+    <div id="updated" class="muted"></div></header>
+  <main id="view"></main>
+  <div id="shade" class="hidden"></div>
+  <nav id="menu" class="hidden">
+    <button data-tab="slips" class="on">Schedine</button><button data-tab="matches">Partite</button>
+    <button data-tab="strat">Strategia</button><button data-tab="surv">Survival</button>
+    <button data-tab="track">Verifica</button><button data-tab="model">Modello</button><button data-tab="info">Info</button>
+  </nav>
+</div>
+<script>
+"use strict";
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pct = (v, d = 1) => v == null ? "—" : (v >= 0 ? "+" : "") + (100 * v).toFixed(d).replace(".", ",") + "%";
+const num = (v, d = 2) => v == null ? "—" : Number(v).toFixed(d).replace(".", ",");
+const fmt = new Intl.DateTimeFormat("it-IT", {timeZone: "Europe/Rome", weekday: "short", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"});
+const when = iso => iso ? fmt.format(new Date(iso)) : "—";
+const store = {get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } },
+               set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} },
+               del: k => { try { localStorage.removeItem(k); } catch (e) {} }};
+let D = null, tab = "slips", openMatch = null;
+
+async function unlock(password) {
+  const blob = await (await fetch("data.json", {cache: "no-store"})).json();
+  const b = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+  const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]);
+  const key = await crypto.subtle.deriveKey({name: "PBKDF2", salt: b(blob.salt), iterations: blob.iter, hash: "SHA-256"},
+                                            base, {name: "AES-GCM", length: 256}, false, ["decrypt"]);
+  const plain = await crypto.subtle.decrypt({name: "AES-GCM", iv: b(blob.iv)}, key, b(blob.ct));
+  return JSON.parse(new TextDecoder().decode(plain));
+}
+
+async function enter(password, remember) {
+  try {
+    D = await unlock(password);
+    if (remember) store.set("f1x2-pw", password);
+    $("#lock").classList.add("hidden"); $("#app").classList.remove("hidden");
+    $("#updated").textContent = "Dati del " + when(D.updated) + (D.odds_fetched ? " · quote del " + when(D.odds_fetched) : "");
+    render();
+  } catch (e) {
+    store.del("f1x2-pw");
+    $("#lockmsg").textContent = "Password sbagliata (o dati non disponibili).";
+  }
+}
+
+$("#lockform").addEventListener("submit", e => { e.preventDefault(); enter($("#pw").value, $("#remember").checked); });
+function menu(open) {
+  $("#menu").classList.toggle("hidden", !open); $("#shade").classList.toggle("hidden", !open);
+  $("#burger").setAttribute("aria-expanded", open ? "true" : "false");
+}
+$("#burger").addEventListener("click", () => menu($("#menu").classList.contains("hidden")));
+$("#shade").addEventListener("click", () => menu(false));
+document.addEventListener("keydown", e => { if (e.key === "Escape") menu(false); });
+document.querySelectorAll("nav button").forEach(b => b.addEventListener("click", () => {
+  tab = b.dataset.tab; openMatch = null;
+  document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x === b));
+  menu(false); render(); window.scrollTo(0, 0);
+}));
+
+function stake() { return Number(store.get("f1x2-stake") || 10); }
+function book() { return Object.keys(D.bookmakers || {}).length > 1 ? (store.get("f1x2-book") || "all") : "pw"; }   // "all" = migliore tra i conti dell'utente (Planetwin365 + bet365, dal 18/11/2026), "pw" = solo Planetwin365
+function V() { return (D.variants && D.variants[book()]) || D; }
+function bookLabel() { return book() === "pw" ? "Planetwin365" : "migliore tra " + Object.values(D.bookmakers).join(", "); }
+function bk(k) { return k ? (D.bookmakers[k] || k) : ""; }
+
+function absentNote(l) {   // absent starters of both teams (already in the odds: late ones are excluded)
+  const A = D.absent || {}, out = [l.home, l.away].map(t => (A[l.code + "|" + t] || []).length
+    ? `${esc(t)}: ${A[l.code + "|" + t].map(p => `${esc(p.player)} (${p.games}/${p.team_games})`).join(", ")}` : "").filter(x => x);
+  return out.length ? `<div class="muted">Titolari assenti: ${out.join("; ")}</div>` : "";
+}
+
+function slipCard(title, s, st0) {
+  if (!s) return `<div class="card"><h3>${esc(title)}</h3><p class="muted">Nessuna combinazione possibile.</p></div>`;
+  const st = st0 || stake(), legs = s.legs.map(l => `<div class="leg"><div class="muted">${when(l.kickoff)} · ${esc(l.league)}</div>
+      <div>${esc(l.home)} – ${esc(l.away)}</div><div><b>${esc(l.market)}</b> @ ${num(l.odds)} <span class="chip">${esc(bk(l.bookmaker))}</span></div>${absentNote(l)}</div>`).join("");
+  return `<div class="card">${title ? `<h3>${esc(title)}</h3>` : ""}${legs}
+    <div class="row" style="justify-content:space-between;margin-top:8px"><span class="big">${num(s.odds)}</span>
+    <span class="muted">vince ${Math.round(100 * s.prob)}% delle volte</span></div>
+    <div class="muted">Con ${st} € incassi ${num(st * s.odds)} € se vince. In media: ${num(st * s.value)} € a giocata (${pct(s.value)}).</div></div>`;
+}
+
+function systemCard(title, s) {   // s: per 1 € of total stake
+  if (!s) return `<div class="card"><h3>${esc(title)}</h3><p class="muted">Nessuna combinazione possibile.</p></div>`;
+  const st = stake(), legs = s.legs.map(l => `<div class="leg"><div class="muted">${when(l.kickoff)} · ${esc(l.league)}</div>
+      <div>${esc(l.home)} – ${esc(l.away)}</div><div><b>${esc(l.market)}</b> @ ${num(l.odds)} <span class="chip">${esc(bk(l.bookmaker))}</span></div>${absentNote(l)}</div>`).join("");
+  return `<div class="card"><h3>${esc(title)}</h3>${legs}
+    <div class="row" style="justify-content:space-between;margin-top:8px"><span class="big">${Math.round(100 * s.win)}%</span>
+    <span class="muted">incassi qualcosa; in utile ${Math.round(100 * s.profit)}% delle volte</span></div>
+    <div class="muted">${s.bets} multiple da ${num(st / s.bets)} € (${st} € in tutto). Incassi da ${num(st * s.min)} € a ${num(st * s.max)} €. In media: ${num(st * s.value)} € a giocata (${pct(s.value)}).</div></div>`;
+}
+
+function viewSlips() {
+  const S = V(), ks = [...new Set(S.custom.map(c => c.k))];
+  if (!S.presets.length) return `<p class="muted">Nessuna partita con quote ${esc(bookLabel())} al momento: escono di solito il venerdì.</p>`;
+  let k = Number(store.get("f1x2-k") || 2); if (!ks.includes(k)) k = ks[0];
+  const obj = store.get("f1x2-obj") || "prob";
+  const targets = S.custom.filter(c => c.k === k && c.objective === obj).map(c => c.target);
+  let t = Number(store.get("f1x2-t") || targets[0]); if (!targets.includes(t)) t = targets[0];
+  const found = S.custom.find(c => c.k === k && c.target === t && c.objective === obj);
+  return `<div class="row"><label>Puntata € <input id="stake" type="number" min="1" step="1" value="${stake()}" style="width:80px"></label>
+    <span class="chip">Quote: ${esc(bookLabel())}</span></div>
+    ${(D.late || []).length ? `<p class="note">Escluse dai consigli (titolare assente annunciato dopo le quote usate per le probabilità): ${D.late.map(x => `${esc(x.home)} – ${esc(x.away)}: ${x.players.map(esc).join(", ")}`).join("; ")}</p>` : ""}
+    <h2>Le più probabili</h2><div class="grid">${S.presets.map(p => slipCard(p.name, p.slip)
+      + (p.k >= 4 && p.slip ? `<p class="note">Nello storico: ${p.k === 4 ? "quadruple −12%" : "cinquine −16%"}, doppie −4%.</p>` : "")
+      + ((p.alts || []).length ? `<details><summary class="muted">Altre ${p.alts.length} senza partite in comune</summary>${p.alts.map((s, i) => slipCard("Alternativa " + (i + 2), s)).join("")}</details>` : "")
+    ).map(h => `<div>${h}</div>`).join("")}</div>
+    ${(S.systems || []).length ? `<h2>Sistemi</h2>
+    <p class="muted">Un sistema gioca tutte le multiple possibili tra le stesse partite, dividendo la puntata: si incassa qualcosa anche sbagliandone una. Vince più spesso della multipla, ma a parità di puntata incassa meno.</p>
+    <div class="grid">${S.systems.map(x => systemCard(x.name, x.sys)).join("")}</div>` : ""}
+    <h2>Costruisci la tua</h2>
+    <div class="row"><select id="selk">${ks.map(x => `<option value="${x}" ${x === k ? "selected" : ""}>${x} ${x === 1 ? "partita" : "partite"}</option>`).join("")}</select>
+      <select id="selt">${targets.map(x => `<option value="${x}" ${x === t ? "selected" : ""}>quota ≥ ${num(x)}</option>`).join("")}</select>
+      <select id="selo"><option value="prob" ${obj === "prob" ? "selected" : ""}>Più probabile</option><option value="value" ${obj === "value" ? "selected" : ""}>Miglior rendimento</option></select></div>
+    ${k >= 4 ? `<p class="note">Con ${k} partite il margine del bookmaker si moltiplica: nello storico le quadruple hanno reso −12% e le cinquine −16%.</p>` : ""}
+    <div class="grid">${found && found.slips.length ? found.slips.map((s, i) => slipCard("Alternativa " + (i + 1), s)).join("") : `<p class="muted">Nessuna combinazione con questi valori.</p>`}</div>
+    <p class="muted">Le alternative non hanno partite in comune. Controlla sempre la quota sul sito del bookmaker prima di giocare.</p>`;
+}
+
+function bindSlips() {
+  const on = (id, f) => { const el = $(id); if (el) el.addEventListener("change", f); };
+  on("#stake", e => { store.set("f1x2-stake", Math.max(1, Number(e.target.value) || 10)); render(); });
+  on("#selk", e => { store.set("f1x2-k", e.target.value); render(); });
+  on("#selt", e => { store.set("f1x2-t", e.target.value); render(); });
+  on("#selo", e => { store.set("f1x2-obj", e.target.value); render(); });
+}
+
+const dayFmt = new Intl.DateTimeFormat("it-IT", {timeZone: "Europe/Rome", weekday: "long", day: "numeric", month: "long"});
+const hourFmt = new Intl.DateTimeFormat("it-IT", {timeZone: "Europe/Rome", hour: "2-digit", minute: "2-digit"});
+
+function matchesSwitch(mode) {
+  const b = (v, lab) => `<button class="seg${mode === v ? " on" : ""}" data-mview="${v}">${lab}</button>`;
+  return `<div class="segs">${b("odds", "Con quote")}${b("cal", "Calendario")}</div>`;
+}
+
+function viewCalendar() {
+  const cal = D.calendar || [];
+  if (!cal.length) return `<p class="muted">Nessuna partita in calendario nei prossimi 14 giorni.</p>`;
+  const leagues = [...new Set(cal.map(c => c.league))];
+  let lg = store.get("f1x2-cal-lg") || ""; if (lg && !leagues.includes(lg)) lg = "";
+  const rows = cal.filter(c => !lg || c.league === lg);
+  const days = [];
+  rows.forEach(c => { const d = dayFmt.format(new Date(c.kickoff));
+    if (!days.length || days[days.length - 1].d !== d) days.push({d, list: []}); days[days.length - 1].list.push(c); });
+  const prob = c => c.p ? `<span class="cal-p"><span>1 ${Math.round(100 * c.p[0])}%</span><span>X ${Math.round(100 * c.p[1])}%</span><span>2 ${Math.round(100 * c.p[2])}%</span></span>` : "";
+  return `<div class="row"><select id="cal-lg"><option value="">Tutti i campionati</option>${leagues.map(x => `<option ${x === lg ? "selected" : ""}>${esc(x)}</option>`).join("")}</select>
+      <span class="muted">${rows.length} partite nei prossimi 14 giorni</span></div>
+    ${days.map(g => `<h2 class="cal-day">${esc(g.d)}</h2>${g.list.map(c => `<div class="cal-row${c.mid != null ? " cal-link" : ""}"${c.mid != null ? ` data-id="${c.mid}" role="button" tabindex="0"` : ""}>
+        <div class="cal-h">${hourFmt.format(new Date(c.kickoff))}</div>
+        <div class="cal-m"><div><b>${esc(c.home)} – ${esc(c.away)}</b></div>
+          <div class="muted">${esc(c.league)}${c.round ? ` · giornata ${c.round}` : ""}${c.mid != null ? ` · <span class="good">quote ›</span>` : ""}</div>${prob(c)}</div></div>`).join("")}`).join("")}
+    <p class="muted">Percentuali 1X2 del modello dove la previsione c'è già (di solito per la prossima giornata). Tocca una partita con «quote ›» per il dettaglio dei mercati.</p>`;
+}
+
+function viewMatches() {
+  if (openMatch !== null) return viewMatch(D.matches[openMatch]);
+  const mode = store.get("f1x2-mview") || "odds";
+  if (mode === "cal") return matchesSwitch(mode) + viewCalendar();
+  if (!D.matches.length) return matchesSwitch(mode) + `<p class="muted">Nessuna partita con quote: escono di solito il venerdì. Le prossime partite sono nel Calendario.</p>`;
+  const pw = book() === "pw";
+  return matchesSwitch(mode) + D.matches.map(m => { const b = pw ? m.best_pw : m.best;
+    return `<button class="match" data-id="${m.id}"><div class="muted">${when(m.kickoff)} · ${esc(m.league)}</div>
+      <div><b>${esc(m.home)} – ${esc(m.away)}</b></div>
+      <div class="muted">${b ? `Più probabile: <b>${esc(b.market)}</b> @ ${num(b.odds)} (${Math.round(100 * b.prob)}%) · ${esc(bk(b.bookmaker))}` : pw ? "Nessuna quota Planetwin365 nelle regole" : "Nessuna giocata nelle regole"}</div></button>`; }).join("");
+}
+
+function judge(p, fair, err, o) {
+  if (!o || o <= 1) return {v: null, s: null, txt: ""};
+  const v = o * p - 1, e = Math.abs(err || 0) / 100 * o, sus = o > 2 * fair;
+  const s = sus ? 0 : Math.min(0.05, Math.max(0, 0.25 * v / (o - 1)));
+  const txt = sus ? `<span class="warn">quota sospetta</span>` : v <= 0 ? `<span class="bad">nessun valore</span>`
+            : v <= e ? `<span class="warn">entro l'errore</span>` : `<span class="good">valore</span>`;
+  return {v, s, txt};
+}
+
+function viewMatch(m) {
+  const groups = [...new Set(m.markets.map(x => x.g))], pw = book() === "pw";
+  const oddsOf = x => pw ? x.pw : x.odds, bkOf = x => pw ? (x.pw ? "planetwin365.it" : "") : x.bk;
+  const pickTxt = (lab, p) => p ? `<div><span class="muted">${lab}:</span> <b>${esc(p.market)}</b> @ ${num(p.odds)} · ${esc(bk(p.bookmaker))} · vince ${Math.round(100 * p.prob)}% · costo ${pct(p.value)}</div>` : "";
+  return `<p><button class="act" id="back">‹ Partite</button></p>
+    <div class="card"><div class="muted">${when(m.kickoff)} · ${esc(m.league)}</div><h3>${esc(m.home)} – ${esc(m.away)}</h3>
+      <div class="muted">Gol attesi ${num(m.xg[0])} – ${num(m.xg[1])}</div>${pickTxt("Più probabile", pw ? m.best_pw : m.best)}${pickTxt("Più conveniente", pw ? m.cheap_pw : m.cheap)}</div>
+    <p class="note">«Quota» è già compilata con le quote ${esc(bookLabel())} (se non c'è, quel mercato non è disponibile): puoi scriverne un'altra per vedere il valore. «Puntata» è la percentuale del budget per le scommesse (un quarto di Kelly, al massimo il 5%).</p>
+    ${groups.map(g => `<h2>${esc(g)}</h2><div class="scroll"><table><tr><th>Mercato</th><th class="num">Prob.</th><th class="num">Giusta</th><th class="num">Quota</th><th>Valore</th><th class="num">Puntata</th></tr>
+      ${m.markets.map((x, i) => x.g !== g ? "" : `<tr data-i="${i}"><td>${esc(x.m)}${bkOf(x) && !pw ? `<div class="muted">${esc(bk(bkOf(x)))}</div>` : ""}</td>
+        <td class="num">${Math.round(100 * x.p)}%</td><td class="num">${num(x.fair)}</td>
+        <td class="num"><input inputmode="decimal" value="${oddsOf(x) ? num(oddsOf(x)) : ""}"></td><td class="val"></td><td class="num stk"></td></tr>`).join("")}</table></div>`).join("")}
+    ${m.exotic.length ? `<h2>Combo e Multigoal da cercare</h2><div class="scroll"><table><tr><th>Mercato</th><th class="num">Prob.</th><th class="num">Giusta</th><th class="num">Gioca solo da</th></tr>
+      ${m.exotic.map(e => `<tr><td>${esc(e.g)}: ${esc(e.m)}</td><td class="num">${Math.round(100 * e.p)}%</td><td class="num">${num(e.fair)}</td><td class="num">${num(e.min)}</td></tr>`).join("")}</table></div>` : ""}`;
+}
+
+function bindMatches() {
+  const open = b => { openMatch = Number(b.dataset.id); render(); window.scrollTo(0, 0); };
+  document.querySelectorAll(".match, .cal-link").forEach(b => b.addEventListener("click", () => open(b)));
+  document.querySelectorAll(".cal-link").forEach(b => b.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(b); } }));
+  document.querySelectorAll("button.seg").forEach(b => b.addEventListener("click", () => { store.set("f1x2-mview", b.dataset.mview); render(); }));
+  const lg = $("#cal-lg"); if (lg) lg.addEventListener("change", e => { store.set("f1x2-cal-lg", e.target.value); render(); });
+  const back = $("#back"); if (back) back.addEventListener("click", () => { openMatch = null; render(); });
+  if (openMatch === null) return;
+  const m = D.matches[openMatch];
+  document.querySelectorAll("tr[data-i]").forEach(tr => {
+    const x = m.markets[Number(tr.dataset.i)], inp = $("input", tr);
+    const upd = () => { const o = Number(String(inp.value).replace(",", ".")); const j = judge(x.p, x.fair, x.err, o);
+      $(".val", tr).innerHTML = j.v == null ? "" : `${pct(j.v)} ${j.txt}`;
+      $(".stk", tr).textContent = j.s ? `${num(100 * j.s, 1)}%` : ""; };
+    inp.addEventListener("input", upd); upd();
+  });
+}
+
+function trackTable(rows, label) {
+  if (!rows.length) return `<p class="muted">Ancora nessuna giocata conclusa.</p>`;
+  return `<div class="scroll"><table><tr><th>${esc(label)}</th><th class="num">Giocate</th><th class="num">Vinte</th><th class="num">Rendimento</th><th class="num">CLV medio</th></tr>
+    ${rows.map(r => `<tr><td>${esc(r.group)}</td><td class="num">${r.bets}</td><td class="num">${r.wins}</td>
+      <td class="num">${pct(r.roi)}<div class="muted">${pct(r.roi_lo)} … ${pct(r.roi_hi)}</div></td>
+      <td class="num">${pct(r.clv)}<div class="muted">${pct(r.clv_lo)} … ${pct(r.clv_hi)}</div></td></tr>`).join("")}</table></div>`;
+}
+
+function trustCard(r) {
+  if (!r || !r.n) return `<div class="card trust"><h3>Quanto ci si può fidare</h3><p class="muted">Servono le prime partite concluse: la misura compare da sola.</p></div>`;
+  const P = v => Math.round(100 * v) + "%";
+  const cls = r.verdict === "ottima" ? "" : r.verdict === "buona" ? "mid" : "low";
+  const bars = r.bands.map(b => `<div class="bar"><span>${esc(b.label)}<div class="muted">${b.n} giocate</div></span>
+      <div class="track"><div class="fill pred" style="width:${100 * b.pred}%"></div><div class="fill real" style="width:${100 * b.actual}%"></div></div>
+      <b>${P(b.actual)}</b></div>`).join("");
+  const edge = r.clv == null ? "" : r.clv > 0
+    ? `<p><b class="good">Vantaggio sul bookmaker: sì</b> — le quote prese sono in media ${pct(r.clv)} migliori di quelle finali.</p>`
+    : `<p><b class="warn">Vantaggio sul bookmaker: non ancora</b> — le probabilità sono giuste, ma le quote prese sono in media ${pct(r.clv)} rispetto a quelle finali: il margine del bookmaker resta.</p>`;
+  return `<div class="card trust"><h3>Quanto ci si può fidare</h3>
+    <div class="headline">Quando diciamo ${P(r.pred)}, si vince il ${P(r.actual)} delle volte.</div>
+    <div class="row"><span class="badge ${cls}">Affidabilità ${esc(r.verdict)}</span><span class="muted">scarto medio ${num(100 * r.gap, 1)} punti · ${r.n} giocate dal ${esc(r.since.split("-").reverse().join("/"))} · misura ${esc(r.strength)}</span></div>
+    <div class="bars">${bars}</div>
+    <div class="muted">Barra chiara = probabilità prevista · barra verde = quante volte si è vinto davvero. Più le due coincidono, più ci si può fidare.</div>
+    ${r.slips ? `<p class="muted">Schedine pronte: previste vinte ${P(r.slips.pred)}, vinte ${P(r.slips.actual)} (${r.slips.n}).</p>` : ""}
+    ${edge}</div>`;
+}
+
+function viewTrack() {
+  const t = D.tracking;
+  return `${trustCard(t.reliability)}<p class="note">Ogni consiglio viene salvato prima della partita e non si modifica più. Il <b>CLV</b> confronta la quota presa con la probabilità del mercato alla chiusura: in media positivo = le quote prese erano migliori di quelle finali. Diventa leggibile dopo 3-4 settimane; il rendimento dopo una stagione. Sotto ogni valore, l'intervallo di confidenza al 95%.</p>
+    <div class="row"><span class="chip">Registrate ${t.logged}</span><span class="chip">Concluse ${t.settled}</span><span class="chip">In attesa ${t.open}</span></div>
+    <h2>Giocate singole</h2>${trackTable(t.by_kind, "Tipo")}
+    <h2>Per mercato</h2>${trackTable(t.by_group, "Mercato")}
+    <h2>Per bookmaker</h2>${trackTable(t.by_book, "Bookmaker")}
+    <h2>Schedine pronte</h2>${trackTable(t.slips, "Schedina")}
+    ${t.ou.length ? `<h2>Consigli in prova over/under</h2>${trackTable(t.ou, "Registro")}` : ""}
+    <h2>Ultime concluse</h2><div class="scroll"><table><tr><th>Partita</th><th>Giocata</th><th>Esito</th><th class="num">CLV</th></tr>
+    ${t.recent.map(r => `<tr><td><div class="muted">${when(r.kickoff)}</div>${esc(r.match)}</td><td>${esc(r.market)} @ ${num(r.odds)}<div class="muted">${esc(r.bookmaker)}</div></td>
+      <td class="${r.status === "vinta" ? "good" : r.status === "persa" ? "bad" : ""}">${esc(r.status)}</td><td class="num">${pct(r.clv)}</td></tr>`).join("")}</table></div>`;
+}
+
+function viewInfo() {
+  return `<p class="note">${esc(D.disclaimer)}</p>
+    <h2>Come sono scelte le giocate</h2>
+    <p>La giocata più probabile di ogni partita, con quota tra ${num(D.rules.min_odds)} e ${num(D.rules.max_odds)} e costo atteso non peggiore di ${pct(-D.rules.max_cost, 0)}, presa al bookmaker con la quota migliore tra ${esc(Object.values(D.bookmakers).join(", "))}. Mai due giocate della stessa partita in una multipla (per quello ci sono i Combo). Al massimo 2-3 partite: ogni partita in più moltiplica il margine del bookmaker.</p>
+    <h2>Lo storico (verifica 2024/25-2025/26)</h2><table><tr><th>Come giocare</th><th class="num">Vinte</th><th class="num">Rendimento</th></tr>
+    ${D.history.map(h => `<tr><td>${esc(h[0])}</td><td class="num">${esc(h[1])}</td><td class="num">${esc(h[2])}</td></tr>`).join("")}</table>
+    <h2>Il tuo bookmaker</h2>
+    <p><select id="selbook"><option value="pw" ${book() === "pw" ? "selected" : ""}>Solo Planetwin365</option>
+      <option value="all" ${book() === "all" ? "selected" : ""}>Migliore tra ${esc(Object.values(D.bookmakers).join(", "))}</option></select></p>
+    <p class="muted">Schedine, giocate e quote delle partite usano solo le quote del bookmaker scelto.</p>
+    <h2>Su iPhone</h2><p>In Safari: Condividi → «Aggiungi alla schermata Home». Si apre come un'app.</p>
+    <p><button class="act" id="logout">Esci e dimentica la password</button></p>`;
+}
+
+// ------------------------------------------------ squadra della giornata (Serie A, una squadra diversa ogni giornata)
+function survLocal() { try { return JSON.parse(store.get("f1x2-surv") || "[]"); } catch (e) { return []; } }
+function survPicks() {   // file in the repository + picks tapped on this device; the file wins for the same round
+  const S = D.survivor, byRound = {};
+  survLocal().forEach(p => { if (p.season === S.season) byRound[p.round] = {...p, local: true}; });
+  S.picks.forEach(p => { if (p.season === S.season) byRound[p.round] = {...p, local: false}; });
+  return Object.values(byRound).sort((a, b) => a.round - b.round);
+}
+function survOutcome(p) {
+  const days = d => new Date(d + "T12:00:00Z").getTime() / 864e5;
+  const r = (D.survivor.results[p.team] || []).find(x => Math.abs(days(x[0]) - days(p.date)) <= 1);
+  if (!r) return {txt: "da giocare", cls: ""};
+  return r[1] > r[2] ? {txt: `vinta ${r[1]}-${r[2]}`, cls: "good"} : {txt: `${r[1] === r[2] ? "pareggio" : "persa"} ${r[1]}-${r[2]}`, cls: "bad"};
+}
+// piano: una squadra diversa per giornata, massima probabilità di superarle tutte (assegnazione, algoritmo ungherese)
+function hungarian(C) {   // C: n righe (giornate) x m colonne (squadre), n <= m; restituisce la colonna di ogni riga
+  const n = C.length, m = C[0].length, INF = 1e18, u = Array(n + 1).fill(0), v = Array(m + 1).fill(0);
+  const p = Array(m + 1).fill(0), way = Array(m + 1).fill(0);
+  for (let i = 1; i <= n; i++) {
+    p[0] = i; let j0 = 0; const minv = Array(m + 1).fill(INF), used = Array(m + 1).fill(false);
+    do {
+      used[j0] = true; const i0 = p[j0]; let delta = INF, j1 = 0;
+      for (let j = 1; j <= m; j++) if (!used[j]) {
+        const cur = C[i0 - 1][j - 1] - u[i0] - v[j];
+        if (cur < minv[j]) { minv[j] = cur; way[j] = j0; }
+        if (minv[j] < delta) { delta = minv[j]; j1 = j; }
+      }
+      for (let j = 0; j <= m; j++) { if (used[j]) { u[p[j]] += delta; v[j] -= delta; } else minv[j] -= delta; }
+      j0 = j1;
+    } while (p[j0] !== 0);
+    do { const j1 = way[j0]; p[j0] = p[j1]; j0 = j1; } while (j0);
+  }
+  const col = Array(n);
+  for (let j = 1; j <= m; j++) if (p[j]) col[p[j] - 1] = j - 1;
+  return col;
+}
+const SURV_ALL = 99;   // «tutte»: fino a usare ogni squadra ancora disponibile
+function survHorizon() { const h = Number(store.get("f1x2-surv-hz")); return [5, 8, 12, SURV_ALL].includes(h) ? h : 8; }
+function survPlan(teams, rounds, W) {   // W: "squadra|giornata" -> probabilità di vittoria
+  rounds = rounds.slice(0, teams.length);
+  if (!teams.length || !rounds.length) return {picks: [], short: null, all: null};
+  const C = rounds.map(r => teams.map(t => -Math.log(Math.max(W[t + "|" + r] || 0, 1e-9))));
+  const col = hungarian(C);
+  const picks = rounds.map((r, i) => ({round: r, team: teams[col[i]], win: W[teams[col[i]] + "|" + r] || 0}));
+  const prod = a => a.reduce((x, y) => x * y, 1);
+  return {picks, short: prod(picks.slice(0, 5).map(x => x.win)), all: prod(picks.map(x => x.win))};
+}
+function viewSurv() {
+  const S = D.survivor;
+  if (!S || S.round == null) return `<p class="muted">Nessuna giornata di Serie A in arrivo nei dati.</p>`;
+  const picks = survPicks(), cur = picks.find(p => p.round === S.round), now = Date.now();
+  const used = new Set(picks.filter(p => p.round !== S.round).map(p => p.team));
+  const free = S.teams.filter(t => !used.has(t.team)), gone = S.teams.filter(t => used.has(t.team));
+  const P = v => v == null ? "—" : Math.round(100 * v) + "%";
+  const P1 = v => v == null ? "—" : v > 0 && v < 0.001 ? "1 su " + Math.round(1 / v).toLocaleString("it-IT")
+    : (100 * v).toFixed(v < 0.1 ? 2 : 1).replace(".", ",") + "%";
+  // piano sulle giornate rimaste: questa dalle quote (se ci sono), le successive dal modello
+  const W = {}; (S.win || []).forEach(([t, r, p]) => { W[t + "|" + r] = p; });
+  const allTeams = [...new Set(S.teams.map(t => t.team))];
+  const rounds = (S.future_rounds || []).filter(r => r >= S.round);
+  const avail = allTeams.filter(t => !used.has(t) && !(cur && cur.team === t));
+  const hz = survHorizon(), ahead = rounds.slice(0, hz);   // orizzonte: le giornate dalla corrente in poi
+  const plan = survPlan(avail, cur ? ahead.filter(r => r > S.round) : ahead, W);
+  const H = plan.picks.length;
+  const suggested = !cur && plan.picks.length && plan.picks[0].round === S.round ? plan.picks[0].team : null;
+  const sugg = free.find(t => t.team === suggested);
+  const likeliest = free.find(t => new Date(t.kickoff).getTime() > now);
+  const alts = !cur && H ? free.filter(t => new Date(t.kickoff).getTime() > now).slice(0, 8).map(t => {
+    const rest = survPlan(avail.filter(x => x !== t.team), ahead.filter(r => r > S.round), W);
+    const all = (t.win || 0) * (rest.all ?? 1), short = (t.win || 0) * rest.picks.slice(0, 4).reduce((x, y) => x * y.win, 1);
+    return {t, all, short, ratio: plan.all ? all / plan.all : null};
+  }) : [];
+  const card = (t, isUsed) => {
+    const started = new Date(t.kickoff).getTime() <= now, chosen = cur && cur.team === t.team;
+    const btn = isUsed ? `<span class="muted">già scelta</span>` : chosen
+      ? (cur.local && !started ? `<button class="act" data-unpick="1">Annulla</button>` : `<b class="good">Scelta</b>`)
+      : !cur && !started ? `<button class="act" data-pick="${esc(t.team)}">Scelgo</button>` : "";
+    const lateNote = t.late && t.late.length ? `<div class="warn">⚠ Titolari dati assenti dopo le quote: ${esc(t.late.join(", "))}. La probabilità potrebbe essere superata.</div>` : "";
+    return `<div class="card surv ${isUsed ? "used" : ""} ${chosen || (!cur && t.team === suggested) ? "top" : ""}">
+      <div><b>${esc(t.team)}</b> ${t.home ? "in casa con" : "in trasferta a"} ${esc(t.opp)}${!cur && t.team === suggested ? ` <span class="badge">piano</span>` : ""}
+        <div class="muted">${when(t.kickoff)} · pareggio ${P(t.draw)} · sconfitta ${P(t.loss)} <span class="chip">${esc(t.src)}</span>${started ? " · iniziata" : ""}</div>${lateNote}</div>
+      <div style="text-align:right"><span class="big">${P(t.win)}</span><div>${btn}</div></div></div>`;
+  };
+  const head = cur ? `<div class="headline">Giornata ${S.round}: hai scelto ${esc(cur.team)}.</div>`
+    : sugg ? `<div class="headline">Giornata ${S.round}: il piano consiglia ${esc(sugg.team)} (${P(sugg.win)}).</div>
+      ${likeliest && likeliest.team !== sugg.team ? `<p class="muted">La più probabile è ${esc(likeliest.team)} (${P(likeliest.win)}), ma conviene tenerla per una giornata più difficile.</p>` : ""}`
+    : likeliest ? `<div class="headline">Giornata ${S.round}: la più probabile è ${esc(likeliest.team)} (${P(likeliest.win)}).</div>` : "";
+  const planHtml = H ? `<h2>Il piano sulle prossime ${H} giornate</h2>
+    <p class="row">Guarda avanti ${[5, 8, 12, SURV_ALL].map(h => `<button class="act" data-hz="${h}" style="${h === hz ? "" : "opacity:.45"}">${h === SURV_ALL ? "tutte" : h}</button>`).join("")} giornate</p>
+    ${hz === SURV_ALL ? `<p class="warn">Piano fino a usare tutte le squadre ancora disponibili (${avail.length}). Serve a vedere l'ordine completo: per la scelta di oggi è meno affidabile, perché sacrifica le giornate vicine per quelle lontane, dove il modello è solo indicativo.</p>` : ""}
+    <p class="muted">Una squadra diversa per giornata, scelta per avere la massima probabilità di superarle tutte. Giornata ${S.round} dalle quote quando ci sono, le altre dal modello con le forze di oggi: più la giornata è lontana, più il numero è indicativo. Guardare troppo avanti sacrifica le giornate vicine (con 20 giornate la probabilità di superare le prossime 5 scende a meno della metà): 8 è un buon compromesso. Si ricalcola a ogni aggiornamento e dopo ogni tua scelta.</p>
+    <div class="card"><div class="row"><div>Superare le prossime ${Math.min(5, H)} giornate: <b>${P1(plan.short)}</b></div><div>Tutte le ${H}: <b>${P1(plan.all)}</b></div></div>
+    <div class="scroll"><table><tr><th>Giornata</th><th>Squadra</th><th class="num">Vittoria</th></tr>
+    ${plan.picks.map(x => `<tr><td>${x.round}</td><td>${esc(x.team)}</td><td class="num">${P(x.win)}</td></tr>`).join("")}</table></div></div>
+    ${alts.length ? `<h2>Quanto costa scegliere un'altra squadra ora</h2>
+    <div class="scroll"><table><tr><th>Ora</th><th class="num">Vittoria</th><th class="num">Prossime 5</th><th class="num">Tutto il piano</th></tr>
+    ${alts.map(a => `<tr><td>${esc(a.t.team)}</td><td class="num">${P(a.t.win)}</td><td class="num">${P1(a.short)}</td>
+      <td class="num ${a.ratio != null && a.ratio < 0.9 ? "bad" : ""}">${a.ratio == null ? "—" : a.ratio > 0.999 ? "il migliore" : "−" + Math.round(100 * (1 - a.ratio)) + "%"}</td></tr>`).join("")}</table></div>
+    <p class="muted">«Tutto il piano»: di quanto scende la probabilità di superare tutte le ${H} giornate rispetto al piano migliore, se ora scegli quella squadra e poi giochi al meglio.</p>` : ""}` : "";
+  const hist = picks.filter(p => p.round !== S.round);
+  return `${head}<p class="note">Una squadra a giornata, mai la stessa due volte fino a fine stagione (${esc(S.season)}). Le squadre già scelte sono in fondo e non contano più. Probabilità di vittoria dalle quote quando ci sono (circa 24 ore prima), altrimenti dal modello. La scelta fatta qui resta su questo dispositivo; quelle nel registro del progetto valgono ovunque.</p>
+    ${planHtml}
+    <h2>Tutte le squadre della giornata ${S.round}</h2>
+    ${free.map(t => card(t, false)).join("")}
+    ${gone.length ? `<h2>Già scelte</h2>${gone.map(t => card(t, true)).join("")}` : ""}
+    ${hist.length ? `<h2>Le tue scelte</h2><table><tr><th>Giornata</th><th>Squadra</th><th>Esito</th></tr>
+      ${hist.map(p => { const o = survOutcome(p); return `<tr><td>${p.round}</td><td>${esc(p.team)}</td><td class="${o.cls}">${esc(o.txt)}</td></tr>`; }).join("")}</table>` : ""}`;
+}
+function bindSurv() {
+  const S = D.survivor, save = l => { store.set("f1x2-surv", JSON.stringify(l)); render(); };
+  document.querySelectorAll("[data-pick]").forEach(b => b.addEventListener("click", () => {
+    const t = S.teams.find(x => x.team === b.dataset.pick);
+    save(survLocal().filter(p => !(p.season === S.season && p.round === S.round))
+      .concat([{season: S.season, round: S.round, team: t.team, date: new Date(t.kickoff).toISOString().slice(0, 10)}]));
+  }));
+  const u = $("[data-unpick]"); if (u) u.addEventListener("click", () => save(survLocal().filter(p => !(p.season === S.season && p.round === S.round))));
+  document.querySelectorAll("[data-hz]").forEach(b => b.addEventListener("click", () => { store.set("f1x2-surv-hz", b.dataset.hz); render(); }));
+}
+
+// ------------------------------------------------ il modello: come nasce ogni probabilità
+const sgn = (v, d = 3) => v == null ? "—" : (v < 0 ? "− " : "+ ") + num(Math.abs(v), d);
+function viewModel() {
+  const Mo = D.model;
+  if (!Mo || !Mo.leagues || !Object.keys(Mo.leagues).length) return `<p class="muted">Parametri del modello non disponibili.</p>`;
+  const H = Mo.hp, a = H.ensemble_a ?? 0.6, b = 1 - a;
+  const worked = `<p>Per ogni partita il calcolo è sempre lo stesso: cambiano solo i numeri delle due squadre e del campionato.</p>
+      <div class="card"><h3><span class="step">1</span>Gol attesi delle due squadre (Dixon-Coles)</h3>
+      <div class="eq">log λ = m + h + att(casa) + dif(trasferta)
+log μ = m     + att(trasferta) + dif(casa)</div>
+      <p class="muted">λ e μ sono i gol attesi di casa e trasferta. m = livello dei gol del campionato, h = vantaggio del campo, att = forza d'attacco della squadra, dif = debolezza della sua difesa (negativa = difesa forte). Ogni squadra ha quindi due numeri, ristimati ogni settimana; m e h sono nella tabella dei campionati più sotto.</p></div>
+      <div class="card"><h3><span class="step">2</span>Probabilità di ogni risultato esatto</h3>
+      <div class="eq">P(x, y) = τ(x, y) · Poisson(x; λ) · Poisson(y; μ)</div>
+      <p class="muted">x = gol di casa, y = gol in trasferta, da 0-0 a 10-10. Poisson indipendenti, con τ che corregge i punteggi bassi (formula più sotto).</p>
+      <div class="eq">P(1) = Σ P(x, y) con x > y
+P(X) = Σ P(x, y) con x = y
+P(2) = Σ P(x, y) con x &lt; y</div></div>
+      <div class="card"><h3><span class="step">3</span>Secondo parere: Elo + logit ordinato</h3>
+      <p>Un modello diverso, che guarda solo chi ha battuto chi: rating Elo aggiornati dopo ogni partita, poi la differenza di rating diventa 1/X/2 con una regressione logistica ordinata (formule più sotto).</p></div>
+      <div class="card trust"><h3><span class="step">4</span>Previsione finale (ensemble)</h3>
+      <div class="eq">P = ${num(a, 1)} · P(Dixon-Coles) + ${num(b, 1)} · P(Elo)</div>
+      <p class="muted">Media pesata dei due modelli, esito per esito: è la probabilità mostrata quando non ci sono quote (per esempio nella scheda Survival).</p></div>`;
+  const C = Mo.markets || {}, cal = C.calib || {};
+  const xi = H.xi || 0.002, half = Math.round(Math.log(2) / xi);
+  return `<p class="note">Il modello conosce solo risultati, calendario e categoria delle squadre. Non sa nulla di assenze, motivazione, coppe, allenatore o meteo: il mercato sì, ed è per questo che quando ci sono le quote il sito usa le probabilità delle quote (vedi «Dalle quote ai 181 mercati»).</p>
+    <h2>Cos'è, a parole</h2>
+    <p>È un modello statistico (econometrico) che trasforma i risultati del passato in probabilità per le partite future: quanto è probabile l'1, l'X e il 2, e quanti gol farà ciascuna squadra. Non «indovina» un risultato: assegna una probabilità a ogni risultato possibile.</p>
+    <p>È composto da tre pezzi:</p>
+    <ol><li><b>Il modello dei gol (Dixon-Coles).</b> Ogni squadra ha due numeri: quanto è forte in attacco e quanto è debole in difesa. Si stimano da tutte le partite giocate, quelle recenti contano di più. Incrociando l'attacco di una squadra con la difesa dell'altra, più il vantaggio di giocare in casa, si ottengono i gol attesi di entrambe; da lì la probabilità di ogni risultato esatto e quindi di 1, X e 2.</li>
+      <li><b>Il modello dei risultati (Elo).</b> Ogni squadra ha un punteggio, come negli scacchi: sale quando vince, scende quando perde, di più se batte una squadra forte o vince largo. La differenza di punteggio tra le due squadre si traduce in probabilità di 1, X e 2. Non guarda i gol fatti e subiti, solo chi ha battuto chi: per questo sbaglia in modo diverso dal primo.</li>
+      <li><b>La media dei due (ensemble).</b> La previsione finale è ${Math.round(100 * a)}% Dixon-Coles e ${Math.round(100 * b)}% Elo. Due modelli che sbagliano in modo diverso, messi insieme, sbagliano meno di ciascuno da solo.</li></ol>
+    <p>I dati sono soltanto i risultati (dal 2015, prima e seconda divisione dei 5 campionati), il calendario e chi è neopromossa. Ogni settimana tutto si ristima da capo usando solo le partite già giocate. Le regolazioni (quanto pesano le partite vecchie, i pesi della media, ecc.) sono state fissate una volta sulle stagioni 2021-24 e poi verificate su due stagioni mai usate per sceglierle.</p>
+    <p>Accanto c'è un quarto pezzo, che non è il modello ma lo usa: <b>il convertitore delle quote</b>. Quando ci sono le quote dei bookmaker, il sito parte da quelle (più informate del modello) e con lo stesso meccanismo dei gol attesi ricava le probabilità di 181 mercati: Under/Over, Goal, Multigoal, Combo, primo tempo.</p>
+    <h2>Come si calcola una partita</h2>${worked}
+    <h2>Come si stimano i parametri</h2>
+    <p><b>Dixon-Coles</b> (Dixon e Coles, 1997): massima verosimiglianza sulle partite passate di prima e seconda divisione, con:</p>
+    <ul><li><b>peso alle partite recenti</b>: ogni partita pesa e<sup>−ξ·giorni</sup>, ξ = ${num(xi, 3)}: una partita di ${half} giorni fa pesa la metà;</li>
+      <li><b>penalità L2</b> = ${num(H.l2, 2)} sulle forze delle squadre: con pochi dati restano vicine alla media;</li>
+      <li><b>δ</b> per i gol in seconda divisione e <b>κ</b> per le neopromosse, che segnano e<sup>−κ</sup> volte meno e subiscono e<sup>κ</sup> volte di più di quanto dica il loro rating;</li>
+      <li><b>ρ</b> corregge 0-0, 1-0, 0-1 e 1-1, che la Poisson pura sbaglia (ρ &lt; 0: più pareggi a pochi gol).</li></ul>
+    <div class="eq">τ(0,0) = 1 − λμρ    τ(0,1) = 1 + λρ
+τ(1,0) = 1 + μρ     τ(1,1) = 1 − ρ
+altrimenti τ = 1</div>
+    <p><b>Elo</b>: dopo ogni partita il rating si sposta di K · G · (risultato − atteso), con K = ${esc(H.elo_k)}, G che cresce con lo scarto di gol e +60 punti al campo di casa; a inizio stagione i rating si avvicinano del ${Math.round(100 * (H.elo_regress || 0))}% alla media.</p>
+    <div class="eq">atteso(casa) = 1 / (1 + 10^(−(R_casa + 60 − R_trasf) / 400))
+z = b · (R_casa − R_trasf) / 100
+P(2) = σ(c₁ − z)
+P(X) = σ(c₂ − z) − σ(c₁ − z)
+P(1) = 1 − σ(c₂ − z)</div>
+    <p>ξ, la penalità, K, la regressione e il peso ${num(a, 1)} / ${num(1 - a, 1)} dell'ensemble sono stati scelti sulle stagioni 2021-24, prima della verifica. Ogni settimana si ristima tutto usando solo partite già giocate (nessuna informazione dal futuro).</p>
+    <h2>Parametri di oggi per campionato</h2>
+    <div class="scroll"><table><tr><th>Campionato</th><th class="num">m</th><th class="num">h casa</th><th class="num">ρ</th><th class="num">κ neopr.</th><th class="num">Partite</th></tr>
+    ${Object.values(Mo.leagues).map(L => `<tr><td>${esc(L.name)}<div class="muted">fino al ${esc(L.last || "—")}</div></td><td class="num">${num(L.mu, 3)}</td><td class="num">${num(L.home, 3)}</td>
+      <td class="num">${num(L.rho, 3)}</td><td class="num">${num(L.kappa, 3)}</td><td class="num">${esc(L.n)}</td></tr>`).join("")}</table></div>
+    <h2>Dalle quote ai 181 mercati</h2>
+    <p>Le schermate Schedine e Partite non usano il modello: partono dalle quote 1X2 e Under/Over 2,5, le più liquide.</p>
+    <ol><li>Si toglie il margine del bookmaker: probabilità = (1/quota) / somma(1/quote).</li>
+      <li>Si cercano i gol attesi λ, μ che riproducono P(1), P(2) e P(Over 2,5) (minimi quadrati, Gauss-Newton).</li>
+      <li>Con la stessa griglia dei risultati esatti si calcola ogni altro mercato: Doppia chance, Multigoal, Combo, Goal/No goal, primo tempo.</li></ol>
+    <div class="eq">P(k gol) ∝ λ^k / (k!)^ν    ν = ${num(C.nu, 2)}
+(Conway-Maxwell-Poisson: meno goleade della Poisson)
+ρ = ${num(C.rho, 3)}    primo tempo = ${num(100 * (C.share || 0), 1)}% dei gol attesi</div>
+    ${cal.b ? `<p>Correzione del 1X2 (logit condizionale, Hill-Griffiths-Lim 16.4, stimato su 35.047 partite 2015-24):</p>
+    <div class="eq">P(j) ∝ exp(a_j + b · log q_j)
+b = ${num(cal.b, 3)}   a_X = ${sgn(cal.a_X)}   a_2 = ${sgn(cal.a_2)}</div>
+    <p class="muted">b &gt; 1: le quote schiacciano le probabilità verso il centro, i favoriti vincono un po' più spesso di quanto dicano; a_X &gt; 0: il pareggio è leggermente sottostimato. Si applica solo a 1X2, Doppia chance e Draw no bet.</p>` : ""}
+    <h2>Quanto funziona</h2>
+    ${Mo.backtest && Mo.backtest.length ? `<div class="scroll"><table><tr><th>Fonte</th><th class="num">Log-loss</th><th class="num">Brier</th><th class="num">RPS</th></tr>
+    ${Mo.backtest.map(b => `<tr><td>${esc(b.label)}</td><td class="num">${num(b.log_loss, 4)}</td><td class="num">${num(b.brier, 3)}</td><td class="num">${num(b.rps, 3)}</td></tr>`).join("")}</table></div>
+    <p class="muted">${esc(Mo.backtest[0].n)} partite delle stagioni 2024/25 e 2025/26, previste una settimana alla volta con i soli dati precedenti. Più basso = meglio. Il modello batte di molto le frequenze storiche ma resta dietro al mercato di chiusura: per questo non è una fonte di «valore» contro i bookmaker.</p>` : `<p class="muted">Risultati del backtest non disponibili.</p>`}
+    <h2>Cosa non sa</h2>
+    <p>Assenze, motivazione, coppe europee, cambi di allenatore, meteo. Posta in palio, riposo e coppe sono stati provati come regressori espliciti e scartati: non miglioravano la log-loss di almeno 0,0005 sulle stagioni di calibrazione. Tiri in porta e assenze sono in prova in avanti, con regole scritte prima dei risultati.</p>`;
+}
+// ------------------------------------------------ strategia: spendere il meno possibile e controllare le promozioni
+function stratCfg() {
+  let c = {}; try { c = JSON.parse(store.get("f1x2-strat") || "{}"); } catch (e) {}
+  return {budget: c.budget > 0 ? c.budget : 20, stake: c.stake > 0 ? c.stake : 5, perWeek: c.perWeek > 0 ? c.perWeek : 1};
+}
+let promoLegs = [{mi: 0, k: 0}];
+const P0 = v => v == null ? "—" : (100 * v).toFixed(1).replace(".", ",") + "%";
+const eur = v => v == null ? "—" : (v < 0 ? "−" : "") + Math.abs(v).toFixed(2).replace(".", ",") + " €";
+function bookCost() {   // costo medio a giocata del bookmaker scelto in Info (prova pinnacle-v1)
+  const C = (D.strategy && D.strategy.costs) || [];
+  const pick = book() === "pw" ? C.filter(c => c.code === "planetwin365.it") : C;
+  const v = pick.map(c => c.cost).filter(x => x != null);
+  return v.length ? (book() === "pw" ? v.reduce((a, b) => a + b, 0) / v.length : Math.min(...v)) : 0.06;
+}
+function promoResult() {
+  const legs = promoLegs.map(l => { const m = D.matches[l.mi]; return m && m.markets[l.k] ? {m, x: m.markets[l.k]} : null; }).filter(Boolean);
+  const same = new Set(legs.map(l => l.m.id)).size < legs.length;
+  const P = legs.reduce((a, l) => a * l.x.p, 1);
+  return {legs, same, P, fair: P > 0 ? 1 / P : null};
+}
+function weekId(d) {   // lunedì della settimana (ora locale), es. "2026-11-16"
+  const x = new Date(d); x.setHours(12, 0, 0, 0); x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
+  return x.toISOString().slice(0, 10);
+}
+function weeklySlips() {   // la doppia (quota ≥ 2,00) e la singola (≥ 1,50) che costano meno, dal motore delle Schedine
+  const S = V(), pick = (k, t) => { const c = S.custom.find(c => c.k === k && c.target === t && c.objective === "value"); return c && c.slips[0]; };
+  return [["Doppia", pick(2, 2.0)], ["Singola", pick(1, 1.5)]].filter(x => x[1]).sort((a, b) => b[1].value - a[1].value);
+}
+function cassaMoves() { try { return JSON.parse(store.get("f1x2-cassa") || "[]"); } catch (e) { return []; } }
+function bonusCfg() { let b = {}; try { b = JSON.parse(store.get("f1x2-bonus") || "{}"); } catch (e) {}
+  return {book: b.book || "", bonus: b.bonus > 0 ? b.bonus : 50, dep: b.dep >= 0 ? b.dep : 50, roll: b.roll > 0 ? b.roll : 5,
+          withDep: !!b.withDep, minOdds: b.minOdds > 1 ? b.minOdds : 1.5}; }
+const CASSA_TYPES = {deposito: ["Deposito", 1], bonus: ["Bonus convertito", 1], vincita: ["Vincita incassata", 1], prelievo: ["Prelievo", -1]};
+function stratPlayed() { try { return JSON.parse(store.get("f1x2-strat-played") || "[]"); } catch (e) { return []; } }
+function viewStrategy() {
+  const c = stratCfg(), stake = c.stake, cost = bookCost();
+  const loss = k => 1 - Math.pow(1 - cost, k);   // perdita attesa per euro con k partite
+  const my = (D.strategy && D.strategy.my) || [], month = new Date().toISOString().slice(0, 7);
+  const mine = my.filter(b => (b.date || "").slice(0, 7) === month);
+  const spentFile = mine.reduce((a, b) => a + (b.stake || 0), 0);
+  const spentHere = stratPlayed().filter(x => (x.at || "").slice(0, 7) === month).length * c.stake;
+  const spent = Math.max(spentFile, spentHere);   // registro del progetto o «l'ho giocata» su questo telefono
+  const done = mine.filter(b => b.status === "vinta" || b.status === "persa");
+  const profit = done.reduce((a, b) => a + (b.profit || 0), 0);
+  const expLoss = mine.reduce((a, b) => a + (b.stake || 0) * loss(b.legs || 1), 0);
+  const clvs = done.map(b => b.clv).filter(v => v != null);
+  const outRule = mine.filter(b => b.legs > 2).length;
+  const wk = weekId(Date.now()), playedHere = stratPlayed().filter(x => x.week === wk).length;
+  const playedFile = my.filter(b => b.date && weekId(b.date + "T12:00:00") === wk).length;
+  const doneWeek = Math.max(playedHere, playedFile), left = c.budget - spent;
+  const W = weeklySlips();
+  let weekHtml;
+  if (left < c.stake) weekHtml = `<div class="card"><b>Budget del mese finito.</b><p class="muted">Hai giocato ${eur(spent)} su ${eur(c.budget)}: si riprende il primo del mese.</p></div>`;
+  else if (doneWeek >= c.perWeek) weekHtml = `<div class="card"><b class="good">Fatto per questa settimana.</b><p class="muted">La prossima schedina da lunedì. Restano ${eur(left)} nel mese.</p>
+      ${playedHere ? `<button class="act" id="unplay" style="opacity:.7">Annulla «l'ho giocata»</button>` : ""}</div>`;
+  else if (!W.length) weekHtml = `<p class="muted">Nessuna schedina nelle regole per ora (${esc(bookLabel())}): le quote escono circa 24 ore prima delle partite, di solito dal venerdì.</p>`;
+  else weekHtml = `${slipCard(W[0][0] + " · la meno cara", W[0][1], c.stake)}
+      <p><button class="act" id="played">L'ho giocata</button></p>
+      ${W[1] ? `<p class="muted">In alternativa: ${esc(W[1][0].toLowerCase())} a ${num(W[1][1].odds)}, valore ${pct(W[1][1].value)}.</p>` : ""}
+      <p class="muted">Scelta tra le giocate delle Schedine (quote 1,20-2,50, costo massimo 6%) quella che costa meno; si aggiorna quando escono nuove quote. Restano ${eur(left)} nel mese. Se hai una promozione che conviene, gioca quella al posto di questa.</p>
+      ${book() === "pw" && Object.keys(D.bookmakers || {}).length > 1 ? `<p class="note">Se hai un conto anche su ${esc(Object.entries(D.bookmakers).filter(([k]) => k !== "planetwin365.it").map(([, v]) => v).join(", "))}, scegli in Info «Migliore tra…»: la schedina usa la quota più alta e ti dice dove giocare ogni partita. Costa circa 1 punto in meno a giocata.</p>` : ""}`;
+  const C = (D.strategy && D.strategy.costs) || [], CB = (D.strategy && D.strategy.combos) || [];
+  const avgCost = b => { const r = C.filter(x => x.book === b && x.cost != null); return r.length ? r.reduce((a, x) => a + x.cost, 0) / r.length : 9; };
+  const books = [...new Set(C.map(x => x.book))].sort((a, b) => avgCost(a) - avgCost(b));
+  const cell = (b, m) => { const r = C.find(x => x.book === b && x.market === m);
+    return `<td class="num">${r && r.cost != null ? "−" + num(100 * r.cost, 1) + "%" + (r.coverage != null && r.coverage < 0.6 ? "*" : "") : "—"}</td>`; };
+  const costTable = C.length ? `<div class="scroll"><table><tr><th>Bookmaker</th><th class="num">1X2</th><th class="num">O/U 2,5</th></tr>
+    ${books.map(b => `<tr><td>${esc(b)}${C.some(x => x.book === b && x.exchange) ? ` <span class="chip">exchange</span>` : ""}</td>${cell(b, "1X2")}${cell(b, "O/U 2,5")}</tr>`).join("")}</table></div>
+    <p class="muted">Quanto perdi in media per ogni euro giocato rispetto alla quota giusta (chiusura di Pinnacle), con le quote 3 ore prima della partita${D.strategy.fixtures ? `, su ${D.strategy.fixtures} partite di Serie A e Premier League del 2026` : ""}. Più in alto = costa meno. ${C.some(x => x.coverage != null && x.coverage < 0.6) ? "* quote presenti in meno del 60% delle partite: numero meno preciso. " : ""}Bookmaker con gli stessi prezzi (per esempio Planetwin365 e BetFlag) usano la stessa piattaforma: aprirli entrambi non serve.</p>` : "";
+  const pw = C.filter(x => x.code === "planetwin365.it"), pwAvg = pw.length ? pw.reduce((a, x) => a + x.cost, 0) / pw.length : null;
+  const comboHtml = CB.length ? `<h2>Su quali bookmaker aprire il conto</h2>
+    <p class="muted">Con più conti si gioca ogni volta dove la quota è più alta: il costo scende. Le combinazioni migliori${pwAvg != null ? ` (solo Planetwin365: −${num(100 * pwAvg, 1)}% in media)` : ""}:</p>
+    <div class="scroll"><table><tr><th>Conti</th><th class="num">1X2</th><th class="num">O/U 2,5</th></tr>
+    ${CB.map((r, i) => `<tr${i === 0 ? ` style="font-weight:700"` : ""}><td>${esc(r.books.join(" + "))}</td><td class="num">${r["1X2"] != null ? "−" + num(100 * r["1X2"], 1) + "%" : "—"}</td><td class="num">${r["O/U 2,5"] != null ? "−" + num(100 * r["O/U 2,5"], 1) + "%" : "—"}</td></tr>`).join("")}</table></div>` : "";
+  // promozione
+  const R = promoResult(), O = Number(String(store.get("f1x2-promo-odds") || "").replace(",", ".")), M = Number(store.get("f1x2-promo-max") || 10);
+  const ev = R.legs.length && O > 1 && !R.same ? O * R.P - 1 : null;
+  const verdict = ev == null ? "" : ev >= 0.03 ? `<span class="badge">conviene</span>` : ev > -0.03 ? `<span class="badge mid">indifferente</span>` : `<span class="badge low">non conviene</span>`;
+  const matchOpts = sel => D.matches.map(m => `<option value="${m.id}" ${m.id === sel ? "selected" : ""}>${esc(m.home)} – ${esc(m.away)} · ${when(m.kickoff)}</option>`).join("");
+  const mkOpts = (m, sel) => m.markets.map((x, i) => `<option value="${i}" ${i === sel ? "selected" : ""}>${esc(x.g)}: ${esc(x.m)} (${Math.round(100 * x.p)}%)</option>`).join("");
+  const promo = !D.matches.length ? `<p class="muted">Nessuna partita con quote in questo momento: le probabilità giuste ci sono da circa 24 ore prima.</p>` : `
+    ${promoLegs.map((l, i) => { const m = D.matches[l.mi] || D.matches[0]; return `<div class="card">
+      <div class="row"><b>Partita ${i + 1}</b>${promoLegs.length > 1 ? ` <button class="act" data-rm="${i}" style="padding:2px 10px">togli</button>` : ""}</div>
+      <p><select data-leg="${i}" data-f="mi" style="width:100%">${matchOpts(m.id)}</select></p>
+      <p><select data-leg="${i}" data-f="k" style="width:100%">${mkOpts(m, l.k)}</select></p>
+      <div class="muted">Probabilità ${P0(m.markets[l.k] && m.markets[l.k].p)} · quota giusta ${num(m.markets[l.k] && m.markets[l.k].fair)}</div></div>`; }).join("")}
+    <p><button class="act" id="addleg">+ aggiungi partita (multipla maggiorata)</button></p>
+    ${R.same ? `<p class="bad">Due esiti della stessa partita non sono indipendenti: la probabilità della multipla sarebbe sbagliata.</p>` : ""}
+    <div class="row"><label>Quota promozione <input id="promoodds" inputmode="decimal" value="${O > 1 ? num(O) : ""}" style="width:90px"></label>
+      <label>Puntata massima € <input id="promomax" inputmode="decimal" value="${M}" style="width:70px"></label></div>
+    <div class="card trust"><div class="row"><div>Quota giusta ${R.legs.length > 1 ? "della multipla" : ""}: <b>${num(R.fair)}</b></div><div>Probabilità: <b>${P0(R.P)}</b></div></div>
+      ${ev == null ? `<p class="muted">Scrivi la quota della promozione.</p>` : `<div class="headline">${verdict} valore ${pct(ev)}</div>
+      <p>Su ${eur(M)} giocati guadagni in media <b>${eur(M * ev)}</b>${ev > 0 ? `; vinci ${P0(R.P)} delle volte ${eur(M * (O - 1))}, altrimenti perdi ${eur(M)}` : ""}.</p>`}</div>
+    <p class="muted">«Indifferente» tra −3% e +3%: è l'errore possibile della quota giusta. Le promozioni con valore positivo sono rare e con puntate massime basse: si giocano solo fino al limite, mai oltre.</p>`;
+  // cassa: deposito, bonus, vincite e prelievi segnati qui; le schedine da «L'ho giocata»
+  const moves = cassaMoves(), plays = stratPlayed();
+  const sumT = t => moves.filter(m => m.t === t).reduce((a, m) => a + m.v, 0);
+  const staked = plays.reduce((a, x) => a + (x.stake || c.stake), 0);
+  const saldo = sumT("deposito") + sumT("bonus") + sumT("vincita") - sumT("prelievo") - staked;
+  const netto = saldo + sumT("prelievo") - sumT("deposito");   // quanto il sistema ha reso rispetto ai soldi messi
+  const cassaHtml = `<div class="card"><div class="row"><div>Saldo <b class="${saldo >= c.stake ? "" : "bad"}">${eur(saldo)}</b></div>
+      <div>Reso finora <b class="${netto >= 0 ? "good" : "bad"}">${eur(netto)}</b></div></div>
+      <p class="muted">Depositi ${eur(sumT("deposito"))} · bonus ${eur(sumT("bonus"))} · vincite ${eur(sumT("vincita"))} · prelievi ${eur(sumT("prelievo"))} · schedine ${eur(-staked)} (${plays.length})</p>
+      ${moves.length || plays.length ? (saldo < c.stake ? `<p class="bad"><b>Stop.</b> La cassa non copre la prossima schedina: si riparte solo con un bonus o una vincita, non con un nuovo deposito. È la regola che rende il sistema autofinanziato.</p>`
+        : netto >= 0 ? `<p class="good">Il sistema si sta ripagando da solo.</p>` : `<p class="muted">Finché «Reso finora» è negativo, i bonus non hanno ancora coperto le perdite.</p>`) : ""}
+      <div class="row"><select id="ctype">${Object.entries(CASSA_TYPES).map(([k, v]) => `<option value="${k}">${v[0]}</option>`).join("")}</select>
+        <input id="cval" inputmode="decimal" placeholder="€" style="width:80px"><button class="act" id="cadd">Aggiungi</button></div>
+      ${moves.length ? `<div class="scroll"><table><tr><th>Data</th><th>Movimento</th><th class="num">Importo</th><th></th></tr>
+        ${moves.slice().reverse().slice(0, 12).map(m => `<tr><td>${esc(m.d)}</td><td>${esc(CASSA_TYPES[m.t][0])}</td><td class="num">${eur(CASSA_TYPES[m.t][1] * m.v)}</td>
+          <td><button class="act" data-cdel="${esc(m.id)}" style="padding:2px 8px;opacity:.7">✕</button></td></tr>`).join("")}</table></div>` : ""}
+      <p class="muted">Segna qui il deposito iniziale, i bonus quando li hai convertiti in soldi prelevabili, le vincite incassate e i prelievi. Le schedine si scalano da sole quando premi «L'ho giocata». Tutto resta su questo telefono.</p></div>`;
+  // calcolatore dei bonus di benvenuto: valore = bonus − giocate richieste × costo del bookmaker
+  const B = bonusCfg(), costOf = code => { const r = C.filter(x => x.code === code && x.cost != null); return r.length ? Math.min(...r.map(x => x.cost)) : null; };
+  const bookOpts = [...new Map(C.map(x => [x.code, x.book])).entries()];
+  const bCost = costOf(B.book) ?? 0.07, turnover = B.roll * (B.bonus + (B.withDep ? B.dep : 0)), bLoss = turnover * bCost, bVal = B.bonus - bLoss;
+  const bonusHtml = `<div class="row"><label>Bookmaker <select id="bbook"><option value="">altro (costo 7%)</option>${bookOpts.map(([k, v]) => `<option value="${esc(k)}" ${k === B.book ? "selected" : ""}>${esc(v)}</option>`).join("")}</select></label></div>
+    <div class="row"><label>Bonus € <input id="bbonus" inputmode="decimal" value="${B.bonus}" style="width:70px"></label>
+      <label>Deposito € <input id="bdep" inputmode="decimal" value="${B.dep}" style="width:70px"></label></div>
+    <div class="row"><label>Da rigiocare <input id="broll" inputmode="decimal" value="${B.roll}" style="width:50px"> volte</label>
+      <label>Quota minima <input id="bmin" inputmode="decimal" value="${num(B.minOdds)}" style="width:60px"></label></div>
+    <label class="row muted"><input id="bwith" type="checkbox" ${B.withDep ? "checked" : ""}> Si rigioca anche il deposito</label>
+    <div class="card trust"><div class="row"><div>Giocate richieste <b>${eur(turnover)}</b></div><div>Costo atteso <b>${eur(-bLoss)}</b></div></div>
+      <div class="headline">${bVal > 0 ? `<span class="badge">conviene</span>` : `<span class="badge low">non conviene</span>`} valore ${eur(bVal)}</div>
+      <p class="muted">Costo del bookmaker ${num(100 * bCost, 1)}% a giocata${costOf(B.book) != null ? " (misurato sul mercato più economico)" : " (stima)"}. Per spendere il meno possibile: rigioca in singole, a quota appena sopra il minimo${B.minOdds > 2 ? " (una quota minima alta costa di più: il margine cresce con la quota)" : ""}, sul mercato che costa meno in quel bookmaker. Leggi sempre scadenza e mercati ammessi: un bonus non completato in tempo vale zero.</p></div>`;
+  return `<p class="note">${esc(D.disclaimer)}</p>
+    <h2>Le regole</h2>
+    <ol><li><b>Solo singole o doppie.</b> Ogni partita in più moltiplica il margine: con il tuo bookmaker perdi in media il ${num(100 * loss(1), 1)}% sulla singola, il ${num(100 * loss(2), 1)}% sulla doppia, il ${num(100 * loss(3), 1)}% sulla tripla, il ${num(100 * loss(5), 1)}% sulla cinquina.</li>
+      <li><b>Sempre la quota più alta</b> tra i bookmaker su cui hai un conto (Info → «Il tuo bookmaker»).</li>
+      <li><b>${c.perWeek === 1 ? "Una schedina" : c.perWeek + " schedine"} a settimana da ${eur(c.stake)}</b>, sempre la stessa puntata. Mai aumentarla per rifarsi di una perdita.</li>
+      <li><b>Budget del mese ${eur(c.budget)}</b>: finito quello, si smette fino al mese dopo (nei mesi da 5 settimane l'ultima si salta).</li>
+      <li><b>Promozioni</b>: se il controllo qui sotto dice «conviene», si gioca quella al posto della schedina della settimana.</li>
+      <li><b>Autofinanziamento</b>: dopo il primo deposito la cassa si ricarica solo con bonus e vincite. Se non copre la schedina, si smette.</li></ol>
+    <h2>La schedina della settimana</h2>
+    ${weekHtml}
+    <h2>La cassa</h2>
+    ${cassaHtml}
+    <h2>Il tuo budget</h2>
+    <div class="row"><label>Budget del mese € <input id="sbudget" inputmode="decimal" value="${c.budget}" style="width:70px"></label>
+      <label>Puntata € <input id="sstake" inputmode="decimal" value="${c.stake}" style="width:60px"></label>
+      <label>Schedine a settimana <input id="sweek" inputmode="numeric" value="${c.perWeek}" style="width:45px"></label></div>
+    <p class="muted">Con ${eur(c.stake)} a schedina giochi ${Math.min(Math.floor(c.budget / c.stake), 5 * c.perWeek)} schedine al mese: in media perdi circa ${eur(Math.min(c.budget, 4 * c.perWeek * c.stake) * loss(2))} al mese in doppie, ${eur(Math.min(c.budget, 4 * c.perWeek * c.stake) * loss(1))} in singole. Le oscillazioni di un mese sono molto più grandi di questa media, in su e in giù.</p>
+    <h2>Questo mese</h2>
+    ${mine.length ? `<div class="card"><div class="row"><div>Giocati <b>${eur(spent)}</b> su ${eur(c.budget)}</div><div>Risultato <b class="${profit >= 0 ? "good" : "bad"}">${eur(profit)}</b></div></div>
+      <div class="row"><div>Perdita attesa <b>${eur(-expLoss)}</b></div><div>CLV medio <b>${clvs.length ? pct(clvs.reduce((a, b) => a + b, 0) / clvs.length) : "—"}</b></div></div>
+      ${spent >= c.budget ? `<p class="bad">Budget del mese finito.</p>` : ""}${outRule ? `<p class="warn">${outRule === 1 ? "1 schedina" : outRule + " schedine"} con più di 2 partite: fuori dalle regole.</p>` : ""}</div>
+      <div class="scroll"><table><tr><th>Data</th><th class="num">Partite</th><th class="num">Quota</th><th class="num">Puntata</th><th>Esito</th><th class="num">Guadagno</th></tr>
+      ${mine.map(b => `<tr><td>${esc(b.date)}</td><td class="num">${b.legs}</td><td class="num">${num(b.odds)}</td><td class="num">${eur(b.stake)}</td>
+        <td class="${b.status === "vinta" ? "good" : b.status === "persa" ? "bad" : ""}">${esc(b.status)}</td><td class="num">${eur(b.profit)}</td></tr>`).join("")}</table></div>`
+      : `<p class="muted">Nessuna giocata registrata questo mese. Le tue giocate reali vanno nel registro del progetto (data/tips/mie_giocate.csv): dimmele e le aggiungo, oppure aggiungile tu. Qui compaiono con esito, perdita attesa e CLV.</p>`}
+    <h2>Quanto costa ogni bookmaker</h2>${costTable}
+    ${comboHtml}
+    <h2>Calcola un bonus di benvenuto</h2>
+    <p class="muted">L'unica fonte di valore positivo certo: il bonus del primo deposito vale più di quanto costa rigiocarlo. Scrivi le condizioni del bookmaker.</p>
+    ${bonusHtml}
+    <h2>Controlla una promozione</h2>
+    <p class="muted">Quota maggiorata, anche su multipla: scegli le partite e gli esiti, scrivi la quota della promozione. Il confronto è con la quota giusta calcolata dalle quote di mercato.</p>
+    ${promo}`;
+}
+function bindStrategy() {
+  const n = id => Number(String($(id).value).replace(",", "."));
+  const save = () => { const b = n("#sbudget"), q = n("#sstake"), w = Math.round(n("#sweek"));
+    store.set("f1x2-strat", JSON.stringify({budget: b > 0 ? b : 20, stake: q > 0 ? q : 5, perWeek: w > 0 ? w : 1})); render(); };
+  ["#sbudget", "#sstake", "#sweek"].forEach(id => $(id).addEventListener("change", save));
+  const pl = $("#played"); if (pl) pl.addEventListener("click", () => {
+    store.set("f1x2-strat-played", JSON.stringify(stratPlayed().concat([{week: weekId(Date.now()), at: new Date().toISOString(), stake: stratCfg().stake}]).slice(-200))); render(); });
+  const up = $("#unplay"); if (up) up.addEventListener("click", () => {
+    const wk = weekId(Date.now()), l = stratPlayed(); const i = l.map(x => x.week).lastIndexOf(wk); if (i >= 0) l.splice(i, 1);
+    store.set("f1x2-strat-played", JSON.stringify(l)); render(); });
+  const ca = $("#cadd"); if (ca) ca.addEventListener("click", () => {
+    const v = n("#cval"); if (!(v > 0)) return;
+    store.set("f1x2-cassa", JSON.stringify(cassaMoves().concat([{id: String(Date.now()), d: new Date().toISOString().slice(0, 10), t: $("#ctype").value, v: Math.round(v * 100) / 100}]))); render(); });
+  document.querySelectorAll("[data-cdel]").forEach(b => b.addEventListener("click", () => {
+    store.set("f1x2-cassa", JSON.stringify(cassaMoves().filter(m => m.id !== b.dataset.cdel))); render(); }));
+  const bsave = () => { store.set("f1x2-bonus", JSON.stringify({book: $("#bbook").value, bonus: n("#bbonus"), dep: n("#bdep"), roll: n("#broll"),
+    withDep: $("#bwith").checked, minOdds: n("#bmin")})); render(); };
+  ["#bbook", "#bbonus", "#bdep", "#broll", "#bmin", "#bwith"].forEach(id => { const el = $(id); if (el) el.addEventListener("change", bsave); });
+  document.querySelectorAll("[data-leg]").forEach(s => s.addEventListener("change", () => {
+    const l = promoLegs[Number(s.dataset.leg)];
+    if (s.dataset.f === "mi") { l.mi = Number(s.value); l.k = 0; } else l.k = Number(s.value);
+    render(); }));
+  document.querySelectorAll("[data-rm]").forEach(b => b.addEventListener("click", () => { promoLegs.splice(Number(b.dataset.rm), 1); render(); }));
+  const add = $("#addleg"); if (add) add.addEventListener("click", () => {
+    const used = new Set(promoLegs.map(l => l.mi)), m = D.matches.find(x => !used.has(x.id)) || D.matches[0];
+    promoLegs.push({mi: m.id, k: 0}); render(); });
+  const o = $("#promoodds"); if (o) o.addEventListener("change", () => { store.set("f1x2-promo-odds", o.value); render(); });
+  const mx = $("#promomax"); if (mx) mx.addEventListener("change", () => { store.set("f1x2-promo-max", String(Number(String(mx.value).replace(",", ".")) || 10)); render(); });
+}
+
+function render() {
+  const titles = {slips: "Schedine pronte", matches: "Partite", surv: "Survival · Serie A", track: "Verifica dei consigli", model: "Il modello", strat: "Strategia", info: "Info"};
+  $("#title").textContent = titles[tab];
+  $("#view").innerHTML = tab === "slips" ? viewSlips() : tab === "matches" ? viewMatches() : tab === "track" ? viewTrack() : tab === "surv" ? viewSurv() : tab === "model" ? viewModel() : tab === "strat" ? viewStrategy() : viewInfo();
+  if (tab === "slips") bindSlips();
+  if (tab === "matches") bindMatches();
+  if (tab === "surv") bindSurv();
+  if (tab === "strat") bindStrategy();
+  if (tab === "info") {
+    $("#logout").addEventListener("click", () => { store.del("f1x2-pw"); location.reload(); });
+    $("#selbook").addEventListener("change", e => { store.set("f1x2-book", e.target.value); render(); });
+  }
+}
+
+const saved = store.get("f1x2-pw");
+if (saved) enter(saved, true);
+</script>
+</body>
+</html>
